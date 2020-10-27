@@ -11,6 +11,8 @@
 // used: angle-vector calculations
 #include "../utilities/math.h"
 
+#include "../utilities/logging.h"
+
 void CMiscellaneous::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 {
 	if (!pLocal->IsAlive())

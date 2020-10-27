@@ -87,6 +87,10 @@ struct Variables_t
 	#pragma region variables_legit
 	// aimbot
 	C_ADD_VARIABLE(bool, bLegit, false);
+	C_ADD_VARIABLE(bool, bLegitEnable, false);
+	C_ADD_VARIABLE(int, iAimbotKey, 0);
+	C_ADD_VARIABLE(float, flLegitFov, 0.f);
+	C_ADD_VARIABLE(float, flLegitSmooth, 0.f);
 
 	// trigger
 	C_ADD_VARIABLE(bool, bTrigger, false);

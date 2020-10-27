@@ -253,13 +253,20 @@ void T::LegitBot()
 				ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 0.5f));
 				ImGui::Selectable(XorStr("aimbot##legitbot"), &C::Get<bool>(Vars.bLegit), ImGuiSelectableFlags_None, ImVec2(30, 0));
 				ImGui::PopStyleVar();
+
 				ImGui::EndMenuBar();
 			}
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
 
-			ImGui::PopStyleVar();
+			ImGui::HotKey(XorStr("aimbot key"), &C::Get<int>(Vars.iAimbotKey));
 
+			ImGui::Separator();
+
+			ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFov), 0.f, 180.f, "%.1f radius");
+			ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmooth), 0.f, 50.f, "%.1f units");
+
+			ImGui::PopStyleVar();
 			ImGui::EndChild();
 		}
 	}

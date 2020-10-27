@@ -16,7 +16,12 @@ public:
 private:
 	// Main
 	/* aimbot, smooth, etc */
-
+	void Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
+	int GetClosestByCrosshair(CBaseEntity* pLocal);
+	QAngle Smooth(QAngle angles, QAngle target_angles);
+	float CalcAnglesDistance(QAngle angles1, QAngle angles2);
+	bool EnnemieInFov(QAngle viewAngles, QAngle anglesToAim);
+	float CalcDiffDegrees(float alpha, float beta);
 	// Check
 	/* is entity valid */
 };

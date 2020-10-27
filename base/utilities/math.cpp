@@ -177,3 +177,10 @@ void M::RotateCenter(const ImVec2& vecCenter, const float flAngle, ImVec2* pOutP
 	pOutPoint->x = x + vecCenter.x;
 	pOutPoint->y = y + vecCenter.y;
 }
+float M::Deg2rad(float angle) {
+	return (float)((M_PI / 180) * angle);
+}
+
+float M::Rad2deg(float angle) {
+	return (float)((180 / M_PI) * angle);
+}

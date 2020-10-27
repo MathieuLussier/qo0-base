@@ -63,6 +63,9 @@ namespace M
 	/* rotates given center point and outputs to given outpoint by given angle */
 	void	RotateCenter(const ImVec2& vecCenter, const float flAngle, ImVec2* pOutPoint);
 
+	float Deg2rad(float angle);
+	float Rad2deg(float angle);
+
 	// Exports
 	inline RandomSeedFn				RandomSeed;
 	inline RandomFloatFn			RandomFloat;
