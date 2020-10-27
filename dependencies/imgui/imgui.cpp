@@ -8591,7 +8591,7 @@ static float ImGui::NavUpdatePageUpPageDown()
     ImGuiWindow* window = g.NavWindow;
     const bool page_up_held = IsKeyDown(g.IO.KeyMap[ImGuiKey_PageUp]) && !IsActiveIdUsingKey(ImGuiKey_PageUp);
     const bool page_down_held = IsKeyDown(g.IO.KeyMap[ImGuiKey_PageDown]) && !IsActiveIdUsingKey(ImGuiKey_PageDown);
-    const bool home_pressed = IsKeyPressed(g.IO.KeyMap[ImGuiKey_Home]) && !IsActiveIdUsingKey(ImGuiKey_Home);
+    const bool home_pressed = IsKeyPressed(g.IO.KeyMap[ImGuiKey_Insert]) && !IsActiveIdUsingKey(ImGuiKey_Insert);
     const bool end_pressed = IsKeyPressed(g.IO.KeyMap[ImGuiKey_End]) && !IsActiveIdUsingKey(ImGuiKey_End);
     if (page_up_held != page_down_held || home_pressed != end_pressed) // If either (not both) are pressed
     {
