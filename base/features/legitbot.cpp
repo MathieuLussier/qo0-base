@@ -62,7 +62,7 @@ void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 
 		QAngle angles_to_aim = M::CalcAngle(local_head_pos, head_pos).Normalize();
 
-		I::Engine->SetViewAngles(CLegitBot::Smooth(pLocal->GetAbsAngles(), angles_to_aim);
+		I::Engine->SetViewAngles(CLegitBot::Smooth(pLocal->GetAbsAngles(), angles_to_aim));
 	}
 }
 
