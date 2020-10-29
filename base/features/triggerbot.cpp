@@ -13,13 +13,48 @@
 // used: firebullet data
 #include "autowall.h"
 
+void CTriggerBot::UpdateSettings(CBaseEntity* pLocal) {
+	CBaseCombatWeapon* pWeapon = pLocal->GetWeapon();
+	short nDefinitionIndex = pWeapon->GetItemDefinitionIndex();
+	CCSWeaponData* pWeaponData = I::WeaponSystem->GetWeaponData(nDefinitionIndex);
+	iTriggerKey = C::Get<int>(Vars.iTriggerKey);
+	bTriggerAlwaysActive = C::Get<bool>(Vars.bTriggerAlwaysActive);
+
+	if (pWeaponData->nWeaponType == WEAPONTYPE_PISTOL && C::Get<bool>(Vars.bTriggerPistol)) {
+		iTriggerDelay = C::Get<int>(Vars.iTriggerDelayPistol);
+		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWallPistol);
+		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamagePistol);
+	}
+	else if (pWeaponData->nWeaponType == WEAPONTYPE_SNIPER && C::Get<bool>(Vars.bTriggerSniper)) {
+		iTriggerDelay = C::Get<int>(Vars.iTriggerDelaySniper);
+		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWallSniper);
+		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamageSniper);
+	}
+	else if (pWeaponData->nWeaponType == WEAPONTYPE_SUBMACHINEGUN && C::Get<bool>(Vars.bTriggerSMG)) {
+		iTriggerDelay = C::Get<int>(Vars.iTriggerDelaySMG);
+		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWallSMG);
+		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamageSMG);
+	}
+	else if (pWeaponData->nWeaponType == WEAPONTYPE_RIFLE && C::Get<bool>(Vars.bTriggerRifle)) {
+		iTriggerDelay = C::Get<int>(Vars.iTriggerDelayRifle);
+		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWallRifle);
+		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamageRifle);
+	}
+	else {
+		iTriggerDelay = C::Get<int>(Vars.iTriggerDelay);
+		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWall);
+		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamage);
+	}
+}
+
 void CTriggerBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal)
 {
 	if (!pLocal->IsAlive())
 		return;
 
-	// check is using key activation and key held
-	if (C::Get<int>(Vars.iTriggerKey) > 0 && IPT::IsKeyDown(C::Get<int>(Vars.iTriggerKey)))
+	CTriggerBot::UpdateSettings(pLocal);
+	
+	if ((iTriggerKey > 0 && IPT::IsKeyDown(iTriggerKey)) || bTriggerAlwaysActive)
 	{
 		CTriggerBot::TriggerBot(pCmd, pLocal);
 	}
@@ -59,7 +94,7 @@ void CTriggerBot::TriggerBot(CUserCmd* pCmd, CBaseEntity* pLocal) {
 	vecEnd = vecStart + vecForward;
 
 	Trace_t trace = { };
-	if (C::Get<bool>(Vars.bTriggerAutoWall))
+	if (bTriggerAutoWall)
 	{
 		FireBulletData_t data = { };
 
@@ -67,7 +102,7 @@ void CTriggerBot::TriggerBot(CUserCmd* pCmd, CBaseEntity* pLocal) {
 		float flDamage = CAutoWall::Get().GetDamage(pLocal, vecEnd, data);
 
 		// check for minimal damage
-		if (flDamage < C::Get<int>(Vars.iTriggerMinimalDamage))
+		if (flDamage < iTriggerMinimalDamage)
 			return;
 
 		// copy trace from autowall
@@ -105,9 +140,9 @@ void CTriggerBot::TriggerBot(CUserCmd* pCmd, CBaseEntity* pLocal) {
 		if (pLocal->CanShoot(static_cast<CWeaponCSBase*>(pWeapon)))
 		{
 			// check is delay elapsed
-			if (C::Get<int>(Vars.iTriggerDelay) > 0)
+			if (iTriggerDelay > 0)
 			{
-				if (timer.Elapsed() < C::Get<int>(Vars.iTriggerDelay))
+				if (timer.Elapsed() < iTriggerDelay)
 					return;
 			}
 

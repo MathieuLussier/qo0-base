@@ -19,6 +19,7 @@ private:
 	EHitboxIndex findClosestHitBox(CBaseEntity* pLocal, CBaseEntity* pEntity);
 	void UpdateSettings(CBaseEntity* pLocal);
 	void Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
+	bool CheckIfWall(CUserCmd* pCmd, CBaseEntity* pLocal, QAngle angles_to_aim);
 	int GetClosestByCrosshair(CBaseEntity* pLocal);
 	QAngle Smooth(QAngle angles, QAngle target_angles);
 	float CalcAnglesDistance(QAngle angles1, QAngle angles2);

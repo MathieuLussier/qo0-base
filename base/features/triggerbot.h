@@ -15,7 +15,13 @@ public:
 	void Run(CUserCmd* pCmd, CBaseEntity* pLocal);
 private:
 	void TriggerBot(CUserCmd* pCmd, CBaseEntity* pLocal);
+	void UpdateSettings(CBaseEntity* pLocal);
 	// Values
 	/* timer for delay before shoot */
+	bool bTriggerAlwaysActive;
+	int iTriggerKey;
+	int iTriggerDelay;
+	bool bTriggerAutoWall;
+	int iTriggerMinimalDamage;
 	CTimer timer = { };
 };

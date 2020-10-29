@@ -367,6 +367,7 @@ void T::LegitBot()
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
 			ImGui::HotKey(XorStr("activation key"), &C::Get<int>(Vars.iTriggerKey));
+			ImGui::Checkbox(XorStr("always active"), &C::Get<bool>(Vars.bTriggerAlwaysActive));
 
 			ImGui::Separator();
 
@@ -402,22 +403,22 @@ void T::LegitBot()
 				CTab{ "SMG", [&style]()
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
-				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTrigger));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTriggerSMG));
 
-				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelay), 0, 500, "%dms");
-				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWall));
-				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamage), 1, 100, "%dhp");
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelaySMG), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWallSMG));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamageSMG), 1, 100, "%dhp");
 
 				ImGui::PopStyleVar();
 			}},
 				CTab{ "Rifle", [&style]()
 			{
 				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
-				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTrigger));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTriggerRifle));
 
-				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelay), 0, 500, "%dms");
-				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWall));
-				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamage), 1, 100, "%dhp");
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelayRifle), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWallRifle));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamageRifle), 1, 100, "%dhp");
 
 				ImGui::PopStyleVar();
 			}}

@@ -128,6 +128,7 @@ struct Variables_t
 
 	// trigger
 	C_ADD_VARIABLE(bool, bTrigger, false);
+	C_ADD_VARIABLE(bool, bTriggerAlwaysActive, false);
 	C_ADD_VARIABLE(int, iTriggerKey, 0);
 	C_ADD_VARIABLE(int, iTriggerDelay, 0);
 	C_ADD_VARIABLE(bool, bTriggerAutoWall, false);

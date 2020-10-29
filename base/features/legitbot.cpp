@@ -111,6 +111,11 @@ void CLegitBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	if (pWeaponData == nullptr)
 		return;
 
+	static CConVar* weapon_recoil_scale = I::ConVar->FindVar(XorStr("weapon_recoil_scale"));
+
+	if (weapon_recoil_scale == nullptr)
+		return;
+
 	if (pWeapon->GetAmmo() == 0 || !pWeapon->IsWeapon() || pWeaponData->nWeaponType == WEAPONTYPE_KNIFE || pWeaponData->nWeaponType == WEAPONTYPE_GRENADE || pWeaponData->nWeaponType == WEAPONTYPE_FISTS || pWeaponData->nWeaponType == WEAPONTYPE_C4)
 		return;
 
@@ -138,6 +143,9 @@ void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 			Vector aim_pos = ent_toAim->GetHitboxPosition(closest_hitbox).value();
 			QAngle angles_to_aim = M::CalcAngle(local_head_pos, aim_pos).Normalize();
 
+			if (CLegitBot::CheckIfWall(pCmd, pLocal, angles_to_aim))
+				return;
+
 			if (bLegitSilent) {
 				pCmd->angViewPoint = angles_to_aim;
 			}
@@ -147,6 +155,42 @@ void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 			}
 		}
 	}
+}
+
+bool CLegitBot::CheckIfWall(CUserCmd* pCmd, CBaseEntity* pLocal, QAngle angles_to_aim)
+{
+	CBaseCombatWeapon* pWeapon = pLocal->GetWeapon();
+
+	short nDefinitionIndex = pWeapon->GetItemDefinitionIndex();
+	CCSWeaponData* pWeaponData = I::WeaponSystem->GetWeaponData(nDefinitionIndex);
+
+	static CConVar* weapon_recoil_scale = I::ConVar->FindVar(XorStr("weapon_recoil_scale"));
+
+	pCmd->angViewPoint = angles_to_aim;
+
+	QAngle angView = pCmd->angViewPoint;
+	angView += pLocal->GetPunch() * weapon_recoil_scale->GetFloat();
+
+	Vector vecStart, vecEnd, vecForward;
+	M::AngleVectors(angView, &vecForward);
+
+	vecStart = pLocal->GetEyePosition();
+	vecForward *= pWeaponData->flRange;
+	vecEnd = vecStart + vecForward;
+
+	Trace_t trace = { };
+	Ray_t ray(vecStart, vecEnd);
+	CTraceFilter filter(pLocal);
+	I::EngineTrace->TraceRay(ray, MASK_SHOT, &filter, &trace);
+
+	CBaseEntity* pEntity = trace.pHitEntity;
+
+	if (pEntity == nullptr || !pEntity->IsAlive() || pEntity->IsDormant() || !pEntity->IsPlayer() || pEntity->HasImmunity() || !pLocal->IsEnemy(pEntity))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 QAngle CLegitBot::Smooth(QAngle angles, QAngle target_angles)
