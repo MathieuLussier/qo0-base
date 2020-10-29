@@ -14,6 +14,7 @@ public:
 	// Get
 	void Run(CUserCmd* pCmd, CBaseEntity* pLocal);
 private:
+	void TriggerBot(CUserCmd* pCmd, CBaseEntity* pLocal);
 	// Values
 	/* timer for delay before shoot */
 	CTimer timer = { };

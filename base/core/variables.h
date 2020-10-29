@@ -87,10 +87,44 @@ struct Variables_t
 	#pragma region variables_legit
 	// aimbot
 	C_ADD_VARIABLE(bool, bLegit, false);
-	C_ADD_VARIABLE(bool, bLegitEnable, false);
+	C_ADD_VARIABLE(bool, bAimbotBetweenShots, false);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecAimbotHitboxes, false);
 	C_ADD_VARIABLE(int, iAimbotKey, 0);
 	C_ADD_VARIABLE(float, flLegitFov, 0.f);
 	C_ADD_VARIABLE(float, flLegitSmooth, 0.f);
+	C_ADD_VARIABLE(bool, bLegitSilent, false);
+
+	// aimbot pistol
+	C_ADD_VARIABLE(bool, bAimbotPistol, false);
+	C_ADD_VARIABLE(bool, bAimbotBetweenShotsPistol, false);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecPistolHitboxes, false);
+	C_ADD_VARIABLE(float, flLegitFovPistol, 0.f);
+	C_ADD_VARIABLE(float, flLegitSmoothPistol, 0.f);
+	C_ADD_VARIABLE(bool, bLegitSilentPistol, false);
+
+	// aimbot Sniper
+	C_ADD_VARIABLE(bool, bAimbotSniper, false);
+	C_ADD_VARIABLE(bool, bAimbotBetweenShotsSniper, false);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecSniperHitboxes, false);
+	C_ADD_VARIABLE(float, flLegitFovSniper, 0.f);
+	C_ADD_VARIABLE(float, flLegitSmoothSniper, 0.f);
+	C_ADD_VARIABLE(bool, bLegitSilentSniper, false);
+
+	// aimbot SMG
+	C_ADD_VARIABLE(bool, bAimbotSMG, false);
+	C_ADD_VARIABLE(bool, bAimbotBetweenShotsSMG, false);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecSMGHitboxes, false);
+	C_ADD_VARIABLE(float, flLegitFovSMG, 0.f);
+	C_ADD_VARIABLE(float, flLegitSmoothSMG, 0.f);
+	C_ADD_VARIABLE(bool, bLegitSilentSMG, false);
+
+	// aimbot Rifle
+	C_ADD_VARIABLE(bool, bAimbotRifle, false);
+	C_ADD_VARIABLE(bool, bAimbotBetweenShotsRifle, false);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecRifleHitboxes, false);
+	C_ADD_VARIABLE(float, flLegitFovRifle, 0.f);
+	C_ADD_VARIABLE(float, flLegitSmoothRifle, 0.f);
+	C_ADD_VARIABLE(bool, bLegitSilentRifle, false);
 
 	// trigger
 	C_ADD_VARIABLE(bool, bTrigger, false);
@@ -104,6 +138,31 @@ struct Variables_t
 	C_ADD_VARIABLE(bool, bTriggerStomach, true);
 	C_ADD_VARIABLE(bool, bTriggerArms, false);
 	C_ADD_VARIABLE(bool, bTriggerLegs, false);
+
+	// triggerbot Pistol
+	C_ADD_VARIABLE(bool, bTriggerPistol, false);
+	C_ADD_VARIABLE(int, iTriggerDelayPistol, 0);
+	C_ADD_VARIABLE(bool, bTriggerAutoWallPistol, false);
+	C_ADD_VARIABLE(int, iTriggerMinimalDamagePistol, 70);
+
+	// triggerbot Sniper
+	C_ADD_VARIABLE(bool, bTriggerSniper, false);
+	C_ADD_VARIABLE(int, iTriggerDelaySniper, 0);
+	C_ADD_VARIABLE(bool, bTriggerAutoWallSniper, false);
+	C_ADD_VARIABLE(int, iTriggerMinimalDamageSniper, 70);
+
+	// triggerbot SMG
+	C_ADD_VARIABLE(bool, bTriggerSMG, false);
+	C_ADD_VARIABLE(int, iTriggerDelaySMG, 0);
+	C_ADD_VARIABLE(bool, bTriggerAutoWallSMG, false);
+	C_ADD_VARIABLE(int, iTriggerMinimalDamageSMG, 70);
+
+	// triggerbot Rifle
+	C_ADD_VARIABLE(bool, bTriggerRifle, false);
+	C_ADD_VARIABLE(int, iTriggerDelayRifle, 0);
+	C_ADD_VARIABLE(bool, bTriggerAutoWallRifle, false);
+	C_ADD_VARIABLE(int, iTriggerMinimalDamageRifle, 70);
+
 	#pragma endregion
 
 	#pragma region variables_visuals

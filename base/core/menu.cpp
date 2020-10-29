@@ -59,6 +59,15 @@ static constexpr std::array<std::string_view, 4U> arrVisualsRemovals =
 	"smoke",
 	"scope"
 };
+
+const char* arrHitboxes[] =
+{
+	"head",
+	"chest",
+	"stomach",
+	"arms",
+	"legs",
+};
 #pragma endregion
 
 // spectator list, radar, other stuff here
@@ -211,6 +220,8 @@ void T::RageBot()
 
 			ImGui::PopStyleVar();
 
+
+
 			ImGui::EndChild();
 		}
 	}
@@ -260,13 +271,74 @@ void T::LegitBot()
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
 
 			ImGui::HotKey(XorStr("aimbot key"), &C::Get<int>(Vars.iAimbotKey));
+			ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShots));
 
 			ImGui::Separator();
 
+			ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecAimbotHitboxes), IM_ARRAYSIZE(arrHitboxes));
 			ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFov), 0.f, 180.f, "%.1f radius");
 			ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmooth), 0.f, 50.f, "%.1f units");
-
+			ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilent));
 			ImGui::PopStyleVar();
+
+			static std::array<CTab, 4U> const arrAimbotTabs =
+			{
+				CTab{ "Pistol", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bAimbotPistol));
+				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsPistol));
+				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecPistolHitboxes), IM_ARRAYSIZE(arrHitboxes));
+
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovPistol), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothPistol), 0.f, 50.f, "%.1f units");
+				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentPistol));
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "Sniper", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Sniper"), &C::Get<bool>(Vars.bAimbotSniper));
+				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsSniper));
+				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecSniperHitboxes), IM_ARRAYSIZE(arrHitboxes));
+
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovSniper), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothSniper), 0.f, 50.f, "%.1f units");
+				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentSniper));
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "SMG", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##SMG"), &C::Get<bool>(Vars.bAimbotSMG));
+				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsSMG));
+				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecSMGHitboxes), IM_ARRAYSIZE(arrHitboxes));
+
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovSMG), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothSMG), 0.f, 50.f, "%.1f units");
+				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentSMG));
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "Rifle", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Rifle"), &C::Get<bool>(Vars.bAimbotRifle));
+				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsRifle));
+				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecRifleHitboxes), IM_ARRAYSIZE(arrHitboxes));
+
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovRifle), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothRifle), 0.f, 50.f, "%.1f units");
+				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentRifle));
+
+				ImGui::PopStyleVar();
+			}}
+			};
+
+			T::Render<arrAimbotTabs.size()>(XorStr("aimbot_legitbot"), arrAimbotTabs, &iEspTab, style.Colors[ImGuiCol_ScrollbarGrab]);
+
 			ImGui::EndChild();
 		}
 	}
@@ -295,12 +367,64 @@ void T::LegitBot()
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
 			ImGui::HotKey(XorStr("activation key"), &C::Get<int>(Vars.iTriggerKey));
+
 			ImGui::Separator();
 
 			ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelay), 0, 500, "%dms");
 			ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWall));
 			ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamage), 1, 100, "%dhp");
 			ImGui::PopStyleVar();
+
+			static std::array<CTab, 4U> const arrTriggerTabs =
+			{
+				CTab{ "Pistol", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTriggerPistol));
+
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelayPistol), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWallPistol));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamagePistol), 1, 100, "%dhp");
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "Sniper", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTriggerSniper));
+
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelaySniper), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWallSniper));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamageSniper), 1, 100, "%dhp");
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "SMG", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTrigger));
+
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelay), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWall));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamage), 1, 100, "%dhp");
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "Rifle", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTrigger));
+
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelay), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWall));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamage), 1, 100, "%dhp");
+
+				ImGui::PopStyleVar();
+			}}
+			};
+
+			T::Render<arrTriggerTabs.size()>(XorStr("aimbot_triggerbot"), arrTriggerTabs, &iEspTab, style.Colors[ImGuiCol_ScrollbarGrab]);
+
 
 			ImGui::EndChild();
 		}

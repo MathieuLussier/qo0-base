@@ -18,6 +18,18 @@ void CTriggerBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal)
 	if (!pLocal->IsAlive())
 		return;
 
+	// check is using key activation and key held
+	if (C::Get<int>(Vars.iTriggerKey) > 0 && IPT::IsKeyDown(C::Get<int>(Vars.iTriggerKey)))
+	{
+		CTriggerBot::TriggerBot(pCmd, pLocal);
+	}
+	else {
+		timer.Reset();
+		return;
+	}
+}
+
+void CTriggerBot::TriggerBot(CUserCmd* pCmd, CBaseEntity* pLocal) {
 	static CConVar* weapon_recoil_scale = I::ConVar->FindVar(XorStr("weapon_recoil_scale"));
 
 	if (weapon_recoil_scale == nullptr)
@@ -34,13 +46,6 @@ void CTriggerBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal)
 	// check is weapon gun
 	if (pWeaponData == nullptr || !pWeaponData->IsGun())
 		return;
-
-	// check is using key activation and key held
-	if (C::Get<int>(Vars.iTriggerKey) > 0 && !IPT::IsKeyDown(C::Get<int>(Vars.iTriggerKey)))
-	{
-		timer.Reset();
-		return;
-	}
 
 	// get view and add punch
 	QAngle angView = pCmd->angViewPoint;
