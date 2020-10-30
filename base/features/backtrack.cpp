@@ -27,7 +27,7 @@ void CBacktrack::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 
 	auto best_fov{ 255.f };
 	CBaseEntity* best_target{ };
-	int besst_target_index{ };
+	int best_target_index{ };
 	Vector best_target_head_position{ };
 	int best_record{ };
 
@@ -46,19 +46,19 @@ void CBacktrack::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 		if (fov < best_fov) {
 			best_fov = fov;
 			best_target = pEntity;
-			besst_target_index = i;
+			best_target_index = i;
 			best_target_head_position = head_position;
 		}
 	}
 
 	if (best_target) {
-		if (CBacktrack::records[besst_target_index].size() <= 3)
+		if (CBacktrack::records[best_target_index].size() <= 3)
 			return;
 
 		best_fov = 255.f;
 
-		for (size_t i = 0; i < CBacktrack::records[besst_target_index].size(); i++) {
-			auto record = &CBacktrack::records[besst_target_index][i];
+		for (size_t i = 0; i < CBacktrack::records[best_target_index].size(); i++) {
+			auto record = &CBacktrack::records[best_target_index][i];
 			if (!record || !CBacktrack::valid_tick(record->simulation_time))
 				continue;
 
@@ -72,7 +72,7 @@ void CBacktrack::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	}
 	
 	if (best_record) {
-		auto record = records[besst_target_index][best_record];
+		auto record = records[best_target_index][best_record];
 		pCmd->iTickCount = CBacktrack::time_to_ticks(record.simulation_time);
 	}
 }
