@@ -18,6 +18,76 @@
 
 #include "../utilities/logging.h"
 
+//void CBacktrack::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
+//{
+//	CBacktrack::legitBackTrack(pCmd, pLocal);
+//}
+//
+//void CBacktrack::update(CBaseEntity* pLocal)
+//{
+//
+//}
+//
+int CBacktrack::BacktrackTicks()
+{
+//	int ret = ((float)C::Get<float>(Vars.flBacktrack) / 1000) / I::Globals->flIntervalPerTick;
+//	return (ret < 1 ? 1 : ret);
+	return 0;
+}
+
+void CBacktrack::legitBackTrack(CUserCmd* cmd, CBaseEntity* pLocal)
+{
+//	int bestTargetIndex = -1;
+//	float bestFov = FLT_MAX;
+//	if (!pLocal->IsAlive())
+//		return;
+//
+//	for (int i = 0; i < I::Globals->nMaxClients; i++)
+//	{
+//		CBaseEntity* entity = I::ClientEntityList->Get<CBaseEntity>(i);
+//
+//		if (entity == nullptr || !entity->IsPlayer() || entity->IsDormant() || !entity->IsAlive() || entity->HasImmunity())
+//			continue;
+//		if (entity->GetTeam() == pLocal->GetTeam())
+//			continue;
+//
+//		if (entity->IsAlive())
+//		{
+//			float simtime = entity->GetSimulationTime();
+//			Vector hitboxPos = entity->GetHitboxPosition(HITBOX_HEAD).value();
+//			headPositions[i][cmd->iCommandNumber % (BacktrackTicks() + 1)] = backtrackData{ simtime, hitboxPos };
+//			Vector ViewDir = angle_vector(cmd->angViewPoint + (pLocal->GetPunch() * 2.f));
+//			float FOVDistance = distance_point_to_line(hitboxPos, pLocal->GetEyePosition(), ViewDir);
+//
+//			if (bestFov > FOVDistance)
+//			{
+//				bestFov = FOVDistance;
+//				bestTargetIndex = i;
+//			}
+//		}
+//	}
+//
+//	float bestTargetSimTime = {};
+//	if (bestTargetIndex != -1)
+//	{
+//		float tempFloat = FLT_MAX;
+//		Vector ViewDir = angle_vector(cmd->angViewPoint + (pLocal->GetPunch() * 2.f));
+//		for (int t = 0; t < BacktrackTicks(); ++t)
+//		{
+//			float tempFOVDistance = distance_point_to_line(headPositions[bestTargetIndex][t].hitboxPos, pLocal->GetEyePosition(), ViewDir);
+//			if (tempFloat > tempFOVDistance && headPositions[bestTargetIndex][t].simtime > pLocal->GetSimulationTime() - 1)
+//			{
+//				tempFloat = tempFOVDistance;
+//				bestTargetSimTime = headPositions[bestTargetIndex][t].simtime;
+//			}
+//		}
+//		if (bestTargetSimTime > 0.f && CBacktrack::valid_tick(bestTargetSimTime))
+//			cmd->iTickCount = CBacktrack::time_to_ticks(bestTargetSimTime);
+//	}
+}
+
+backtrackData headPositions[64][25];
+
 void CBacktrack::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 {
 	if (!(pCmd->iButtons & IN_ATTACK))
