@@ -19,6 +19,7 @@ private:
 	EHitboxIndex findClosestHitBox(CBaseEntity* pLocal, CBaseEntity* pEntity);
 	void UpdateSettings(CBaseEntity* pLocal);
 	void Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
+	void RCS(CUserCmd* pCmd, CBaseEntity* pLocal);
 	bool CheckIfWall(CUserCmd* pCmd, CBaseEntity* pLocal, QAngle angles_to_aim);
 	int GetClosestByCrosshair(CBaseEntity* pLocal);
 	QAngle Smooth(QAngle angles, QAngle target_angles);
@@ -26,15 +27,19 @@ private:
 	bool EnnemieInFov(QAngle viewAngles, QAngle anglesToAim, float fov);
 	float CalcDiffDegrees(float alpha, float beta);
 	int iAimbotKey;
+	QAngle v_old_punch;
 	bool bAimbotBetweenShots;
 	float flLegitFov;
 	float flLegitSmooth;
 	bool bLegitSilent;
+	float flLegitSilentFov;
 	bool bHitboxHead;
 	bool bHitboxChest;
 	bool bHitboxStomach;
 	bool bHitboxArms;
 	bool bHitboxlegs;
+	float flLegitRecoilX;
+	float flLegitRecoilY;
 	// Check
 	/* is entity valid */
 };

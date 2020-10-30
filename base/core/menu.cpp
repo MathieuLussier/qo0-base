@@ -276,12 +276,19 @@ void T::LegitBot()
 			ImGui::Separator();
 
 			ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecAimbotHitboxes), IM_ARRAYSIZE(arrHitboxes));
-			ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFov), 0.f, 180.f, "%.1f radius");
+			ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFov), 0.f, 20.f, "%.1f radius");
 			ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmooth), 0.f, 50.f, "%.1f units");
 			ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilent));
+			ImGui::SliderFloat(XorStr("silent aim fov"), &C::Get<float>(Vars.flLegitSilentFov), 0.f, 2.f, "%.1f radius");
+			ImGui::SliderFloat(XorStr("rcs pitch"), &C::Get<float>(Vars.flLegitRecoilX), 0.f, 1.f, "%.1f amount");
+			ImGui::SliderFloat(XorStr("rcs yaw"), &C::Get<float>(Vars.flLegitRecoilY), 0.f, 1.f, "%.1f amount");
+
+			ImGui::Checkbox(XorStr("backtrack"), &C::Get<bool>(Vars.bBacktrack));
+			ImGui::SliderFloat(XorStr("Records (ms)"), &C::Get<float>(Vars.flBacktrack), 1.f, 200.f, "%.2f ms");
+
 			ImGui::PopStyleVar();
 
-			static std::array<CTab, 4U> const arrAimbotTabs =
+			static std::array<CTab, 5U> const arrAimbotTabs =
 			{
 				CTab{ "Pistol", [&style]()
 			{
@@ -290,9 +297,13 @@ void T::LegitBot()
 				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsPistol));
 				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecPistolHitboxes), IM_ARRAYSIZE(arrHitboxes));
 
-				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovPistol), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovPistol), 0.f, 20.f, "%.1f radius");
 				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothPistol), 0.f, 50.f, "%.1f units");
 				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentPistol));
+				ImGui::SliderFloat(XorStr("silent aim fov"), &C::Get<float>(Vars.flLegitSilentFovPistol), 0.f, 2.f, "%.1f radius");
+
+				ImGui::SliderFloat(XorStr("rcs pitch"), &C::Get<float>(Vars.flLegitRecoilXPistol), 0.f, 1.f, "%.1f amount");
+				ImGui::SliderFloat(XorStr("rcs yaw"), &C::Get<float>(Vars.flLegitRecoilYPistol), 0.f, 1.f, "%.1f amount");
 
 				ImGui::PopStyleVar();
 			}},
@@ -303,9 +314,13 @@ void T::LegitBot()
 				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsSniper));
 				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecSniperHitboxes), IM_ARRAYSIZE(arrHitboxes));
 
-				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovSniper), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovSniper), 0.f, 20.f, "%.1f radius");
 				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothSniper), 0.f, 50.f, "%.1f units");
 				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentSniper));
+				ImGui::SliderFloat(XorStr("silent aim fov"), &C::Get<float>(Vars.flLegitSilentFovSniper), 0.f, 2.f, "%.1f radius");
+
+				ImGui::SliderFloat(XorStr("rcs pitch"), &C::Get<float>(Vars.flLegitRecoilXSniper), 0.f, 1.f, "%.1f amount");
+				ImGui::SliderFloat(XorStr("rcs yaw"), &C::Get<float>(Vars.flLegitRecoilYSniper), 0.f, 1.f, "%.1f amount");
 
 				ImGui::PopStyleVar();
 			}},
@@ -316,9 +331,13 @@ void T::LegitBot()
 				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsSMG));
 				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecSMGHitboxes), IM_ARRAYSIZE(arrHitboxes));
 
-				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovSMG), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovSMG), 0.f, 20.f, "%.1f radius");
 				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothSMG), 0.f, 50.f, "%.1f units");
 				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentSMG));
+				ImGui::SliderFloat(XorStr("silent aim fov"), &C::Get<float>(Vars.flLegitSilentFovSMG), 0.f, 2.f, "%.1f radius");
+
+				ImGui::SliderFloat(XorStr("rcs pitch"), &C::Get<float>(Vars.flLegitRecoilXSMG), 0.f, 1.f, "%.1f amount");
+				ImGui::SliderFloat(XorStr("rcs yaw"), &C::Get<float>(Vars.flLegitRecoilYSMG), 0.f, 1.f, "%.1f amount");
 
 				ImGui::PopStyleVar();
 			}},
@@ -329,9 +348,30 @@ void T::LegitBot()
 				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsRifle));
 				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecRifleHitboxes), IM_ARRAYSIZE(arrHitboxes));
 
-				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovRifle), 0.f, 180.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovRifle), 0.f, 20.f, "%.1f radius");
 				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothRifle), 0.f, 50.f, "%.1f units");
 				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentRifle));
+				ImGui::SliderFloat(XorStr("silent aim fov"), &C::Get<float>(Vars.flLegitSilentFovRifle), 0.f, 2.f, "%.1f radius");
+
+				ImGui::SliderFloat(XorStr("rcs pitch"), &C::Get<float>(Vars.flLegitRecoilXRifle), 0.f, 1.f, "%.1f amount");
+				ImGui::SliderFloat(XorStr("rcs yaw"), &C::Get<float>(Vars.flLegitRecoilYRifle), 0.f, 1.f, "%.1f amount");
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "Heavy", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Heavy"), &C::Get<bool>(Vars.bAimbotHeavy));
+				ImGui::Checkbox(XorStr("aim between shots"), &C::Get<bool>(Vars.bAimbotBetweenShotsHeavy));
+				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecHeavyHitboxes), IM_ARRAYSIZE(arrHitboxes));
+
+				ImGui::SliderFloat(XorStr("aimbot fov"), &C::Get<float>(Vars.flLegitFovHeavy), 0.f, 20.f, "%.1f radius");
+				ImGui::SliderFloat(XorStr("aimbot smooth"), &C::Get<float>(Vars.flLegitSmoothHeavy), 0.f, 50.f, "%.1f units");
+				ImGui::Checkbox(XorStr("silent aim"), &C::Get<bool>(Vars.bLegitSilentHeavy));
+				ImGui::SliderFloat(XorStr("silent aim fov"), &C::Get<float>(Vars.flLegitSilentFovHeavy), 0.f, 2.f, "%.1f radius");
+
+				ImGui::SliderFloat(XorStr("rcs pitch"), &C::Get<float>(Vars.flLegitRecoilXHeavy), 0.f, 1.f, "%.1f amount");
+				ImGui::SliderFloat(XorStr("rcs yaw"), &C::Get<float>(Vars.flLegitRecoilYHeavy), 0.f, 1.f, "%.1f amount");
 
 				ImGui::PopStyleVar();
 			}}
@@ -376,7 +416,7 @@ void T::LegitBot()
 			ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamage), 1, 100, "%dhp");
 			ImGui::PopStyleVar();
 
-			static std::array<CTab, 4U> const arrTriggerTabs =
+			static std::array<CTab, 5U> const arrTriggerTabs =
 			{
 				CTab{ "Pistol", [&style]()
 			{
@@ -419,6 +459,17 @@ void T::LegitBot()
 				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelayRifle), 0, 500, "%dms");
 				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWallRifle));
 				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamageRifle), 1, 100, "%dhp");
+
+				ImGui::PopStyleVar();
+			}},
+				CTab{ "Heavy", [&style]()
+			{
+				ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
+				ImGui::Checkbox(XorStr("enable##Pistol"), &C::Get<bool>(Vars.bTriggerHeavy));
+
+				ImGui::SliderInt(XorStr("reaction delay##trigger"), &C::Get<int>(Vars.iTriggerDelayHeavy), 0, 500, "%dms");
+				ImGui::Checkbox(XorStr("auto wall##trigger"), &C::Get<bool>(Vars.bTriggerAutoWallHeavy));
+				ImGui::SliderInt(XorStr("minimal damage##trigger"), &C::Get<int>(Vars.iTriggerMinimalDamageHeavy), 1, 100, "%dhp");
 
 				ImGui::PopStyleVar();
 			}}
@@ -610,6 +661,8 @@ void T::Visuals()
 			ImGui::SliderFloat(XorStr("viewmodel fov"), &C::Get<float>(Vars.flScreenViewModelFOV), -90.f, 90.f, "%.1f\xC2\xB0");
 			ImGui::Separator();
 
+			ImGui::Checkbox(XorStr("force crosshair"), &C::Get<bool>(Vars.bScreenForceCrosshair));
+			ImGui::Checkbox(XorStr("crosshair recoil"), &C::Get<bool>(Vars.bScreenCrosshairRecoil));
 			ImGui::Checkbox(XorStr("hitmarker"), &C::Get<bool>(Vars.bScreenHitMarker));
 			ImGui::Checkbox(XorStr("damage"), &C::Get<bool>(Vars.bScreenHitMarkerDamage));
 			ImGui::Checkbox(XorStr("sound"), &C::Get<bool>(Vars.bScreenHitMarkerSound));

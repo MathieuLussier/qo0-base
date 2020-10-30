@@ -93,6 +93,9 @@ struct Variables_t
 	C_ADD_VARIABLE(float, flLegitFov, 0.f);
 	C_ADD_VARIABLE(float, flLegitSmooth, 0.f);
 	C_ADD_VARIABLE(bool, bLegitSilent, false);
+	C_ADD_VARIABLE(float, flLegitSilentFov, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilX, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilY, 0.f);
 
 	// aimbot pistol
 	C_ADD_VARIABLE(bool, bAimbotPistol, false);
@@ -101,6 +104,11 @@ struct Variables_t
 	C_ADD_VARIABLE(float, flLegitFovPistol, 0.f);
 	C_ADD_VARIABLE(float, flLegitSmoothPistol, 0.f);
 	C_ADD_VARIABLE(bool, bLegitSilentPistol, false);
+	C_ADD_VARIABLE(float, flLegitSilentFovPistol, 0.f);
+
+	C_ADD_VARIABLE(float, flLegitRecoilXPistol, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilYPistol, 0.f);
+
 
 	// aimbot Sniper
 	C_ADD_VARIABLE(bool, bAimbotSniper, false);
@@ -109,6 +117,10 @@ struct Variables_t
 	C_ADD_VARIABLE(float, flLegitFovSniper, 0.f);
 	C_ADD_VARIABLE(float, flLegitSmoothSniper, 0.f);
 	C_ADD_VARIABLE(bool, bLegitSilentSniper, false);
+	C_ADD_VARIABLE(float, flLegitSilentFovSniper, 0.f);
+
+	C_ADD_VARIABLE(float, flLegitRecoilXSniper, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilYSniper, 0.f);
 
 	// aimbot SMG
 	C_ADD_VARIABLE(bool, bAimbotSMG, false);
@@ -117,6 +129,10 @@ struct Variables_t
 	C_ADD_VARIABLE(float, flLegitFovSMG, 0.f);
 	C_ADD_VARIABLE(float, flLegitSmoothSMG, 0.f);
 	C_ADD_VARIABLE(bool, bLegitSilentSMG, false);
+	C_ADD_VARIABLE(float, flLegitSilentFovSMG, 0.f);
+
+	C_ADD_VARIABLE(float, flLegitRecoilXSMG, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilYSMG, 0.f);
 
 	// aimbot Rifle
 	C_ADD_VARIABLE(bool, bAimbotRifle, false);
@@ -125,6 +141,22 @@ struct Variables_t
 	C_ADD_VARIABLE(float, flLegitFovRifle, 0.f);
 	C_ADD_VARIABLE(float, flLegitSmoothRifle, 0.f);
 	C_ADD_VARIABLE(bool, bLegitSilentRifle, false);
+	C_ADD_VARIABLE(float, flLegitSilentFovRifle, 0.f);
+
+	C_ADD_VARIABLE(float, flLegitRecoilXRifle, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilYRifle, 0.f);
+
+	// aimbot Heavy
+	C_ADD_VARIABLE(bool, bAimbotHeavy, false);
+	C_ADD_VARIABLE(bool, bAimbotBetweenShotsHeavy, false);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecHeavyHitboxes, false);
+	C_ADD_VARIABLE(float, flLegitFovHeavy, 0.f);
+	C_ADD_VARIABLE(float, flLegitSmoothHeavy, 0.f);
+	C_ADD_VARIABLE(bool, bLegitSilentHeavy, false);
+	C_ADD_VARIABLE(float, flLegitSilentFovHeavy, 0.f);
+
+	C_ADD_VARIABLE(float, flLegitRecoilXHeavy, 0.f);
+	C_ADD_VARIABLE(float, flLegitRecoilYHeavy, 0.f);
 
 	// trigger
 	C_ADD_VARIABLE(bool, bTrigger, false);
@@ -163,6 +195,16 @@ struct Variables_t
 	C_ADD_VARIABLE(int, iTriggerDelayRifle, 0);
 	C_ADD_VARIABLE(bool, bTriggerAutoWallRifle, false);
 	C_ADD_VARIABLE(int, iTriggerMinimalDamageRifle, 70);
+
+	// triggerbot Heavy
+	C_ADD_VARIABLE(bool, bTriggerHeavy, false);
+	C_ADD_VARIABLE(int, iTriggerDelayHeavy, 0);
+	C_ADD_VARIABLE(bool, bTriggerAutoWallHeavy, false);
+	C_ADD_VARIABLE(int, iTriggerMinimalDamageHeavy, 70);
+
+	// backtrack
+	C_ADD_VARIABLE(bool, bBacktrack, false);
+	C_ADD_VARIABLE(float, flBacktrack, 1.f);
 
 	#pragma endregion
 
@@ -261,6 +303,8 @@ struct Variables_t
 	C_ADD_VARIABLE(bool, bScreen, false);
 	C_ADD_VARIABLE(float, flScreenCameraFOV, 0.f);
 	C_ADD_VARIABLE(float, flScreenViewModelFOV, 0.f);
+	C_ADD_VARIABLE(bool, bScreenForceCrosshair, false);
+	C_ADD_VARIABLE(bool, bScreenCrosshairRecoil, false);
 	C_ADD_VARIABLE(bool, bScreenHitMarker, false);
 	C_ADD_VARIABLE(bool, bScreenHitMarkerDamage, false);
 	C_ADD_VARIABLE(bool, bScreenHitMarkerSound, false);

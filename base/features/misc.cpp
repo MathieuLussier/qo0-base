@@ -30,6 +30,26 @@ void CMiscellaneous::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 
 	if (C::Get<bool>(Vars.bMiscRevealRanks) && pCmd->iButtons & IN_SCORE)
 		I::Client->DispatchUserMessage(CS_UM_ServerRankRevealAll, 0U, 0, nullptr);
+
+	static auto weapon_debug_spread_show = I::ConVar->FindVar("weapon_debug_spread_show");
+
+	if (pLocal->IsAlive() && !pLocal->IsScoped() && C::Get<bool>(Vars.bScreenForceCrosshair) && weapon_debug_spread_show != nullptr)
+	{
+		weapon_debug_spread_show->SetValue(3);
+	}
+	else {
+		weapon_debug_spread_show->SetValue(0);
+	}
+
+	static auto cl_crosshair_recoil = I::ConVar->FindVar("cl_crosshair_recoil");
+
+	if (C::Get<bool>(Vars.bScreenCrosshairRecoil) && cl_crosshair_recoil != nullptr)
+	{
+		cl_crosshair_recoil->SetValue(1);
+	}
+	else {
+		cl_crosshair_recoil->SetValue(0);
+	}
 }
 
 void CMiscellaneous::Event(IGameEvent* pEvent, const FNV1A_t uNameHash)

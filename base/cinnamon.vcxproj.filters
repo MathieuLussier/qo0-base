@@ -416,6 +416,8 @@
     </ClInclude>
     <ClInclude Include="sdk\interfaces\iviewrender.h">
       <Filter>include\sdk\interfaces</Filter>
+    <ClInclude Include="features\backtrack.h">
+      <Filter>include\features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -541,6 +543,9 @@
     </ClCompile>
     <ClCompile Include="..\dependencies\minhook\hde\hde64.c">
       <Filter>dependencies\minhook\hde32</Filter>
+    </ClCompile>
+    <ClCompile Include="features\backtrack.cpp">
+      <Filter>source\features</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

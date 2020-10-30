@@ -134,6 +134,21 @@ QAngle M::CalcAngle(const Vector& vecStart, const Vector& vecEnd)
 	return angView;
 }
 
+QAngle M::CalcAngle(const Vector& source, const Vector& destination, const QAngle& viewAngles) {
+	Vector delta = source - destination;
+	auto radians_to_degrees = [](float radians) { return radians * 180 / static_cast<float>(M_PI); };
+	QAngle angles;
+	angles.x = radians_to_degrees(atanf(delta.z / std::hypotf(delta.x, delta.y))) - viewAngles.x;
+	angles.y = radians_to_degrees(atanf(delta.y / delta.x)) - viewAngles.y;
+	angles.z = 0.0f;
+
+	if (delta.x >= 0.0)
+		angles.y += 180.0f;
+
+	angles.Normalize();
+	return angles;
+}
+
 Vector M::VectorTransform(const Vector& vecTransform, const matrix3x4_t& matrix)
 {
 	return Vector(vecTransform.DotProduct(matrix[0]) + matrix[0][3],

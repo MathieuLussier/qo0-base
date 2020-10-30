@@ -40,6 +40,11 @@ void CTriggerBot::UpdateSettings(CBaseEntity* pLocal) {
 		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWallRifle);
 		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamageRifle);
 	}
+	else if ((pWeaponData->nWeaponType == WEAPONTYPE_MACHINEGUN || pWeaponData->nWeaponType == WEAPONTYPE_SHOTGUN) && C::Get<bool>(Vars.bTriggerHeavy)) {
+		iTriggerDelay = C::Get<int>(Vars.iTriggerDelayHeavy);
+		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWallHeavy);
+		iTriggerMinimalDamage = C::Get<int>(Vars.iTriggerMinimalDamageHeavy);
+	}
 	else {
 		iTriggerDelay = C::Get<int>(Vars.iTriggerDelay);
 		bTriggerAutoWall = C::Get<bool>(Vars.bTriggerAutoWall);

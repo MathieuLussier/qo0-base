@@ -12,6 +12,8 @@
 // used: backtracking
 #include "lagcompensation.h"
 
+#include "../utilities.h"
+
 #include "../utilities/math.h"
 
 #include "../utilities/logging.h"
@@ -35,6 +37,10 @@ void CLegitBot::UpdateSettings(CBaseEntity* pLocal) {
 		bHitboxlegs = hitboxes[4];
 
 		bLegitSilent = C::Get<bool>(Vars.bLegitSilentPistol);
+		flLegitSilentFov = C::Get<float>(Vars.flLegitSilentFovPistol);
+
+		flLegitRecoilX = C::Get<float>(Vars.flLegitRecoilXPistol);
+		flLegitRecoilY = C::Get<float>(Vars.flLegitRecoilYPistol);
 	}
 	else if (pWeaponData->nWeaponType == WEAPONTYPE_SNIPER && C::Get<bool>(Vars.bAimbotSniper)) {
 		bAimbotBetweenShots = C::Get<bool>(Vars.bAimbotBetweenShotsSniper);
@@ -49,6 +55,10 @@ void CLegitBot::UpdateSettings(CBaseEntity* pLocal) {
 		bHitboxlegs = hitboxes[4];
 
 		bLegitSilent = C::Get<bool>(Vars.bLegitSilentSniper);
+		flLegitSilentFov = C::Get<float>(Vars.flLegitSilentFovSniper);
+
+		flLegitRecoilX = C::Get<float>(Vars.flLegitRecoilXSniper);
+		flLegitRecoilY = C::Get<float>(Vars.flLegitRecoilYSniper);
 	}
 	else if (pWeaponData->nWeaponType == WEAPONTYPE_SUBMACHINEGUN && C::Get<bool>(Vars.bAimbotSMG)) {
 		bAimbotBetweenShots = C::Get<bool>(Vars.bAimbotBetweenShotsSMG);
@@ -63,6 +73,10 @@ void CLegitBot::UpdateSettings(CBaseEntity* pLocal) {
 		bHitboxlegs = hitboxes[4];
 
 		bLegitSilent = C::Get<bool>(Vars.bLegitSilentSMG);
+		flLegitSilentFov = C::Get<float>(Vars.flLegitSilentFovSMG);
+
+		flLegitRecoilX = C::Get<float>(Vars.flLegitRecoilXSMG);
+		flLegitRecoilY = C::Get<float>(Vars.flLegitRecoilYSMG);
 	}
 	else if (pWeaponData->nWeaponType == WEAPONTYPE_RIFLE && C::Get<bool>(Vars.bAimbotRifle)) {
 		bAimbotBetweenShots = C::Get<bool>(Vars.bAimbotBetweenShotsRifle);
@@ -77,6 +91,28 @@ void CLegitBot::UpdateSettings(CBaseEntity* pLocal) {
 		bHitboxlegs = hitboxes[4];
 
 		bLegitSilent = C::Get<bool>(Vars.bLegitSilentRifle);
+		flLegitSilentFov = C::Get<float>(Vars.flLegitSilentFovRifle);
+
+		flLegitRecoilX = C::Get<float>(Vars.flLegitRecoilXRifle);
+		flLegitRecoilY = C::Get<float>(Vars.flLegitRecoilYRifle);
+	}
+	else if ((pWeaponData->nWeaponType == WEAPONTYPE_MACHINEGUN || pWeaponData->nWeaponType == WEAPONTYPE_SHOTGUN) && C::Get<bool>(Vars.bAimbotHeavy)) {
+		bAimbotBetweenShots = C::Get<bool>(Vars.bAimbotBetweenShotsHeavy);
+		flLegitFov = C::Get<float>(Vars.flLegitFovHeavy);
+		flLegitSmooth = C::Get<float>(Vars.flLegitSmoothHeavy);
+
+		std::vector<bool> hitboxes = C::Get<std::vector<bool>>(Vars.vecHeavyHitboxes);
+		bHitboxHead = hitboxes[0];
+		bHitboxChest = hitboxes[1];
+		bHitboxStomach = hitboxes[2];
+		bHitboxArms = hitboxes[3];
+		bHitboxlegs = hitboxes[4];
+
+		bLegitSilent = C::Get<bool>(Vars.bLegitSilentHeavy);
+		flLegitSilentFov = C::Get<float>(Vars.flLegitSilentFovHeavy);
+
+		flLegitRecoilX = C::Get<float>(Vars.flLegitRecoilXHeavy);
+		flLegitRecoilY = C::Get<float>(Vars.flLegitRecoilYHeavy);
 	}
 	else {
 		iAimbotKey = C::Get<int>(Vars.iAimbotKey);
@@ -92,6 +128,10 @@ void CLegitBot::UpdateSettings(CBaseEntity* pLocal) {
 		bHitboxlegs = hitboxes[4];
 
 		bLegitSilent = C::Get<bool>(Vars.bLegitSilent);
+		flLegitSilentFov = C::Get<float>(Vars.flLegitSilentFov);
+
+		flLegitRecoilX = C::Get<float>(Vars.flLegitRecoilX);
+		flLegitRecoilY = C::Get<float>(Vars.flLegitRecoilY);
 	}
 }
 
@@ -116,7 +156,7 @@ void CLegitBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	if (weapon_recoil_scale == nullptr)
 		return;
 
-	if (pWeapon->GetAmmo() == 0 || !pWeapon->IsWeapon() || pWeaponData->nWeaponType == WEAPONTYPE_KNIFE || pWeaponData->nWeaponType == WEAPONTYPE_GRENADE || pWeaponData->nWeaponType == WEAPONTYPE_FISTS || pWeaponData->nWeaponType == WEAPONTYPE_C4)
+	if (!pLocal->CanShoot(static_cast<CWeaponCSBase*>(pWeapon)) || pWeapon->GetAmmo() == 0 || !pWeapon->IsWeapon() || pWeaponData->nWeaponType == WEAPONTYPE_KNIFE || pWeaponData->nWeaponType == WEAPONTYPE_GRENADE || pWeaponData->nWeaponType == WEAPONTYPE_FISTS || pWeaponData->nWeaponType == WEAPONTYPE_C4)
 		return;
 
 	// disable when in-menu for more legit (lol)
@@ -125,8 +165,15 @@ void CLegitBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 
 	CLegitBot::UpdateSettings(pLocal);
 
-	if ((iAimbotKey > 0 && IPT::IsKeyDown(iAimbotKey)) || bAimbotBetweenShots)
+	if (((iAimbotKey > 0 && IPT::IsKeyDown(iAimbotKey)) || bAimbotBetweenShots) && pLocal->GetShotsFired() <= 1)
 		CLegitBot::Aimbot(pCmd, pLocal, bSendPacket);
+
+	if (pLocal->GetShotsFired() > 1) {
+		CLegitBot::RCS(pCmd, pLocal);
+	}
+	else {
+		v_old_punch = { 0.0f, 0.0f, 0.0f };
+	}
 }
 
 void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
@@ -142,11 +189,11 @@ void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 		if (closest_hitbox > HITBOX_INVALID) {
 			Vector aim_pos = ent_toAim->GetHitboxPosition(closest_hitbox).value();
 			QAngle angles_to_aim = M::CalcAngle(local_head_pos, aim_pos).Normalize();
-
-			if (CLegitBot::CheckIfWall(pCmd, pLocal, angles_to_aim))
+			
+			if (!pLocal->IsVisible(ent_toAim, aim_pos, true) || U::LineGoesThroughSmoke(local_head_pos, aim_pos))
 				return;
 
-			if (bLegitSilent) {
+			if (bLegitSilent && CLegitBot::EnnemieInFov(pLocal->GetAbsAngles(), angles_to_aim, flLegitSilentFov)) {
 				pCmd->angViewPoint = angles_to_aim;
 			}
 			else {
@@ -155,6 +202,20 @@ void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 			}
 		}
 	}
+}
+
+void CLegitBot::RCS(CUserCmd* pCmd, CBaseEntity* pLocal) {
+	static CConVar* weapon_recoil_scale = I::ConVar->FindVar(XorStr("weapon_recoil_scale"));
+
+	auto v_aim_punch = pLocal->GetPunch() * weapon_recoil_scale->GetFloat();
+
+	v_aim_punch.x *= flLegitRecoilX;
+	v_aim_punch.y *= flLegitRecoilY;
+
+	auto v_rcs = pCmd->angViewPoint += (v_old_punch - v_aim_punch);
+
+	I::Engine->SetViewAngles(v_rcs.Normalize());
+	v_old_punch = v_aim_punch;
 }
 
 bool CLegitBot::CheckIfWall(CUserCmd* pCmd, CBaseEntity* pLocal, QAngle angles_to_aim)

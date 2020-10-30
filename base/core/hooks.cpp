@@ -25,6 +25,7 @@
 #include "../features/legitbot.h"
 #include "../features/triggerbot.h"
 #include "../features/visuals.h"
+#include "../features/backtrack.h"
 #include "../features/misc.h"
 #include "../features/skinchanger.h"
 
@@ -288,6 +289,9 @@ bool FASTCALL H::hkCreateMove(IClientModeShared* thisptr, int edx, float flInput
 
 		if (C::Get<bool>(Vars.bAntiAim))
 			CAntiAim::Get().Run(pCmd, pLocal, bSendPacket);
+			
+		if (C::Get<bool>(Vars.bBacktrack))
+			CBacktrack::Get().Run(pCmd, pLocal, bSendPacket);
 	}
 	CPrediction::Get().End(pCmd, pLocal);
 
@@ -426,7 +430,7 @@ void FASTCALL H::hkFrameStageNotify(IBaseClientDll* thisptr, int edx, EClientFra
 		 * received all packets, now do interpolation, prediction, etc
 		 * e.g. backtrack stuff
 		 */
-
+		CBacktrack::Get().update(pLocal);
 		break;
 	}
 	case FRAME_RENDER_START:

@@ -41,6 +41,7 @@
     <ClInclude Include="core\variables.h" />
     <ClInclude Include="features\antiaim.h" />
     <ClInclude Include="features\autowall.h" />
+    <ClInclude Include="features\backtrack.h" />
     <ClInclude Include="features\lagcompensation.h" />
     <ClInclude Include="features\legitbot.h" />
     <ClInclude Include="features\misc.h" />
@@ -145,6 +146,7 @@
     <ClCompile Include="core\interfaces.cpp" />
     <ClCompile Include="core\menu.cpp" />
     <ClCompile Include="core\netvar.cpp" />
+    <ClCompile Include="features\backtrack.cpp" />
     <ClCompile Include="features\misc.cpp" />
     <ClCompile Include="features\prediction.cpp" />
     <ClCompile Include="main.cpp" />
