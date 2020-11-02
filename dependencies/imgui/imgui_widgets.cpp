@@ -1030,7 +1030,7 @@ bool ImGui::Checkbox(const char* label, bool* v)
 
     const ImRect check_bb(pos, pos + ImVec2(square_sz, square_sz));
     RenderNavHighlight(total_bb, id);
-	// modified by qo0
+	// modified by kbk
 	PushStyleColor(ImGuiCol_Border, GetColorU32((held && hovered) ? ImGuiCol_ControlBgActive : hovered ? ImGuiCol_ControlBgHovered : ImGuiCol_Border));
 	RenderFrame(check_bb.Min, check_bb.Max, GetColorU32(ImGuiCol_FrameBg), true, style.FrameRounding);
 	PopStyleColor();
@@ -1043,7 +1043,7 @@ bool ImGui::Checkbox(const char* label, bool* v)
     }
     else if (*v)
     {
-		// modified by qo0
+		// modified by kbk
 		// checkbox
 		//window->DrawList->AddRectFilled(check_bb.Min + ImVec2(pad, pad), check_bb.Max - ImVec2(pad, pad), GetColorU32(ImGuiCol_CheckMark), style.FrameRounding);
 		// gradient
@@ -1468,7 +1468,7 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
     const float w = (flags & ImGuiComboFlags_NoPreview) ? arrow_size : expected_w;
 	const float h = GetFrameHeight();
 
-	// modified by qo0
+	// modified by kbk
     const ImRect frame_bb(window->DC.CursorPos + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + h : 0.0f, label_size.x > 0.0f ? label_size.y : 0.0f), window->DC.CursorPos + ImVec2(w, (label_size.x > 0.0f ? label_size.y : 0.0f) + h));
     const ImRect total_bb(window->DC.CursorPos, frame_bb.Max - ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + h : 0.0f, 0.0f));
 
@@ -1486,7 +1486,7 @@ bool ImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboF
         window->DrawList->AddRectFilled(frame_bb.Min, ImVec2(value_x2, frame_bb.Max.y), GetColorU32(hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_ControlBg), style.FrameRounding, (flags & ImGuiComboFlags_NoArrowButton) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Left);
     if (!(flags & ImGuiComboFlags_NoArrowButton))
     {
-		// modified by qo0
+		// modified by kbk
         window->DrawList->AddRectFilled(ImVec2(value_x2, frame_bb.Min.y), frame_bb.Max, GetColorU32(hovered ? ImGuiCol_ControlBgHovered : ImGuiCol_ControlBgActive), style.FrameRounding, (w <= arrow_size) ? ImDrawCornerFlags_All : ImDrawCornerFlags_Right);
         if (value_x2 + arrow_size - style.FramePadding.x <= frame_bb.Max.x)
             RenderArrow(window->DrawList, ImVec2(value_x2 + style.FramePadding.y, frame_bb.Min.y + style.FramePadding.y + 4), GetColorU32(ImGuiCol_Triangle), popup_open ? ImGuiDir_Up : ImGuiDir_Down, 0.5f);
@@ -2353,7 +2353,7 @@ bool ImGui::SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_typ
     const bool is_decimal = (data_type == ImGuiDataType_Float) || (data_type == ImGuiDataType_Double);
     const bool is_power = (power != 1.0f) && is_decimal;
 
-	// modified by qo0
+	// modified by kbk
     const float grab_padding = 2.0f;
     const float slider_sz = (bb.Max[axis] - bb.Min[axis]) - grab_padding * 2.0f;
     float grab_sz = style.GrabMinSize;
@@ -2505,7 +2505,7 @@ bool ImGui::SliderBehaviorT(const ImRect& bb, ImGuiID id, ImGuiDataType data_typ
         if (axis == ImGuiAxis_Y)
             grab_t = 1.0f - grab_t;
         const float grab_pos = ImLerp(slider_usable_pos_min, slider_usable_pos_max, grab_t);
-		// modified by qo0
+		// modified by kbk
         if (axis == ImGuiAxis_X)
             *out_grab_bb = ImRect(slider_usable_pos_min - grab_sz * 0.5f, bb.Min.y + grab_padding, grab_pos + grab_sz * 0.5f, bb.Max.y - grab_padding);
         else
@@ -2554,7 +2554,7 @@ bool ImGui::SliderBehavior(const ImRect& bb, ImGuiID id, ImGuiDataType data_type
 // Read code of e.g. SliderFloat(), SliderInt() etc. or examples in 'Demo->Widgets->Data Types' to understand how to use this function directly.
 bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, float power)
 {
-	// modified by qo0
+	// modified by kbk
 	ImGuiWindow* window = GetCurrentWindow();
     if (window->SkipItems)
         return false;
@@ -2566,7 +2566,7 @@ bool ImGui::SliderScalar(const char* label, ImGuiDataType data_type, void* p_dat
 	const float h = GetFrameHeight();
     const ImVec2 label_size = CalcTextSize(label, NULL, true);
 
-    // modified by qo0
+    // modified by kbk
 	const ImRect frame_bb(window->DC.CursorPos + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + h : 0.0f, label_size.x > 0.0f ? label_size.y : 0.0f), window->DC.CursorPos + ImVec2(w, (label_size.x > 0.0f ? label_size.y : 0.0f) + h));
 	const ImRect total_bb(window->DC.CursorPos, frame_bb.Max - ImVec2((label_size.x > 0.0f ? style.ItemInnerSpacing.x + h : 0.0f), 0.0f));
 
@@ -3492,7 +3492,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     const ImVec2 label_size = CalcTextSize(label, NULL, true);
 	const float h = GetFrameHeight();
 
-	// modified by qo0
+	// modified by kbk
     const ImVec2 frame_size = CalcItemSize(size_arg, CalcItemWidth() - (label_size.x > 0.0f ? style.ItemInnerSpacing.x + h : 0.0f), (is_multiline ? g.FontSize * 8.0f : label_size.y) + style.FramePadding.y * 2.0f); // Arbitrary default of 8 lines high for multi-line
     const ImVec2 total_size = ImVec2(frame_size.x, frame_size.y);
 
@@ -4025,7 +4025,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
     // Render frame
     if (!is_multiline)
     {
-		// modified by qo0
+		// modified by kbk
         RenderNavHighlight(frame_bb, id);
 		PushStyleColor(ImGuiCol_Border, GetColorU32(g.ActiveId == id ? ImGuiCol_ControlBgActive : g.HoveredId == id ? ImGuiCol_ControlBgHovered : ImGuiCol_Border));
 		RenderFrame(frame_bb.Min, frame_bb.Max, GetColorU32(ImGuiCol_ControlBg), true, style.FrameRounding);
@@ -4239,7 +4239,7 @@ bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_
         LogRenderedText(&draw_pos, buf_display, buf_display_end);
 
     if (label_size.x > 0)
-		// modified by qo0
+		// modified by kbk
 		RenderText(ImVec2(frame_bb.Min.x, total_bb.Min.y + style.FramePadding.y), label);
 
     if (value_changed && !(flags & ImGuiInputTextFlags_NoMarkEdited))
@@ -6726,7 +6726,7 @@ static void ImGui::TabBarLayout(ImGuiTabBar* tab_bar)
         for (int tab_n = 0; tab_n < tab_bar->Tabs.Size; tab_n++)
         {
             ImGuiTabItem* tab = &tab_bar->Tabs[tab_n];
-			// modified by qo0
+			// modified by kbk
 			tab->Width = tab_max_width;
             IM_ASSERT(tab->Width > 0.0f);
         }

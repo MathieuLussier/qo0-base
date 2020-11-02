@@ -477,7 +477,12 @@ void FASTCALL H::hkFrameStageNotify(IBaseClientDll* thisptr, int edx, EClientFra
 
 			// my solution is here cuz camera offset is dynamically by standard functions without any garbage in overrideview hook
 			I::Input->bCameraInThirdPerson = bThirdPerson && pLocal->IsAlive() && !I::Engine->IsTakingScreenshot();
+			if (I::Input->bCameraInThirdPerson) {
+				I::Prediction->SetLocalViewAngles(G::angRealView);
+				pLocal->UpdateClientSideAnimations();
+			}
 			I::Input->vecCameraOffset.z = bThirdPerson ? C::Get<float>(Vars.flWorldThirdPersonOffset) : 150.f;
+		
 		}
 
 		break;

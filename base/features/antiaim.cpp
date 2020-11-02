@@ -13,6 +13,8 @@
 // used: get corrected tickbase
 #include "prediction.h"
 
+#include "ragebot.h"
+
 void CAntiAim::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 {
 	// check is not frozen and alive
@@ -96,7 +98,9 @@ void CAntiAim::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	}
 
 	// send angles
+
 	pCmd->angViewPoint = angSentView;
+	LastAngle = pCmd->angViewPoint;
 }
 
 void CAntiAim::UpdateServerAnimations(CUserCmd* pCmd, CBaseEntity* pLocal)
@@ -176,10 +180,6 @@ void CAntiAim::Pitch(CUserCmd* pCmd, CBaseEntity* pLocal)
 	case (int)EAntiAimPitchType::DOWN:
 		angSentView.x = 89.f;
 		break;
-	case (int)EAntiAimPitchType::ZERO:
-		// untrusted pitch example
-		angSentView.x = 1080.f;
-		break;
 	}
 }
 
@@ -195,39 +195,167 @@ void CAntiAim::Yaw(CUserCmd* pCmd, CBaseEntity* pLocal, float flServerTime, bool
 	case (int)EAntiAimYawType::NONE:
 		break;
 	case (int)EAntiAimYawType::DESYNC:
-	{
-		static float flSide = 1.0f;
-
-		/*
-		 * manually change the side
-		 * @note: to visually seen that - make desync chams by saving matrix or draw direction arrows
-		 */
-		if (C::Get<int>(Vars.iAntiAimDesyncKey) > 0 && IPT::IsKeyReleased(C::Get<int>(Vars.iAntiAimDesyncKey)))
-			flSide = -flSide;
-
-		// check is lowerbody updated
-		if (flServerTime >= flNextLowerBodyUpdate)
-		{
-			// check is we not choke now
-			if (I::ClientState->nChokedCommands == 0)
-				// choke packet to make update invisibly
-				bSendPacket = false;
-
-			angSentView.y -= 120.f * flSide;
-		}
-
-		if (bSendPacket)
-			// real
-			angSentView.y += (flMaxDesyncDelta + 30) * flSide;
-		else
-			// fake
-			angSentView.y -= (flMaxDesyncDelta + 30) * flSide;
-
+		CAntiAim::Desync(pCmd, flServerTime, flMaxDesyncDelta, bSendPacket);
 		break;
-	}
+	case (int)EAntiAimYawType::Jitter:
+		CAntiAim::Jitter(pCmd, flServerTime, flMaxDesyncDelta, bSendPacket);
+		break;
+	case (int)EAntiAimYawType::BackJitter:
+		CAntiAim::BackJitter(pCmd);
+		break;
 	default:
 		break;
 	}
+}
+
+void CAntiAim::Desync(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta, bool& bSendPacket) {
+	static float flSide = 1.0f;
+
+	/*
+	 * manually change the side
+	 * @note: to visually seen that - make desync chams by saving matrix or draw direction arrows
+	 */
+	if (C::Get<int>(Vars.iAntiAimDesyncKey) > 0 && IPT::IsKeyReleased(C::Get<int>(Vars.iAntiAimDesyncKey)))
+		flSide = -flSide;
+
+	// check is lowerbody updated
+	if (flServerTime >= flNextLowerBodyUpdate)
+	{
+		// check is we not choke now
+		if (I::ClientState->nChokedCommands == 0)
+			// choke packet to make update invisibly
+			bSendPacket = false;
+
+		angSentView.y -= 120.f * flSide;
+	}
+
+	if (bSendPacket)
+		// real
+		angSentView.y += (flMaxDesyncDelta + 30) * flSide;
+	else
+		// fake
+		angSentView.y -= (flMaxDesyncDelta + 30) * flSide;
+}
+
+void CAntiAim::Jitter(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta, bool& bSendPacket)
+{
+	/*static int jitterangle = 0;
+
+	if (jitterangle <= 1)
+	{
+		angSentView.y += 90;
+	}
+	else if (jitterangle > 1 && jitterangle <= 3)
+	{
+		angSentView.y -= 90;
+	}
+
+	int re = rand() % 4 + 1;
+
+
+	if (jitterangle <= 1)
+	{
+		if (re == 4)
+			angSentView.y += 180;
+		jitterangle += 1;
+	}
+	else if (jitterangle > 1 && jitterangle <= 3)
+	{
+		if (re == 4)
+			angSentView.y -= 180;
+		jitterangle += 1;
+	}
+	else
+	{
+		jitterangle = 0;
+	}*/
+	static float flSide = 1.0f;
+
+	if (flServerTime >= flNextLowerBodyUpdate)
+	{
+		// check is we not choke now
+		if (I::ClientState->nChokedCommands == 0)
+			// choke packet to make update invisibly
+			bSendPacket = false;
+
+	}
+
+	angSentView.y -= 180.f;
+
+	int random = rand() % 100;
+
+	if (random < 15)
+	{
+		float change = -70 + (rand() % (int)(140 + 1));
+		if (bSendPacket)
+			// real
+			angSentView.y += (flMaxDesyncDelta + change);
+		else
+			// fake
+			angSentView.y -= (flMaxDesyncDelta + change);
+	}
+	if (random == 69)
+	{
+		float change = -90 + (rand() % (int)(180 + 1));
+		if (bSendPacket)
+			// real
+			angSentView.y += (flMaxDesyncDelta + change);
+		else
+			// fake
+			angSentView.y -= (flMaxDesyncDelta + change);
+	}
+}
+
+void CAntiAim::BackJitter(CUserCmd* pCmd)
+{
+	QAngle currentViewAngles = pCmd->angViewPoint;
+	int random = rand() % 100;
+
+	//// Small chance of starting fowards
+	if (random < 98)
+		// Look backwards
+		angSentView.y -= 180;
+
+	//// Some gitter
+	if (random < 15)
+	{
+		float change = -70 + (rand() % (int)(140 + 1));
+		angSentView.y += change;
+	}
+	if (random == 69)
+	{
+		float change = -90 + (rand() % (int)(180 + 1));
+		angSentView.y += change;
+	}
+
+	//CorrectMovement(currentViewAngles.y, pCmd, pCmd->flForwardMove, pCmd->flSideMove);
+}
+
+void CAntiAim::CorrectMovement(float OldAngleY, CUserCmd* pCmd, float fOldForward, float fOldSidemove)
+{
+	//side/forward move correction
+	float deltaView = angSentView.y - OldAngleY;
+	float f1;
+	float f2;
+
+	if (OldAngleY < 0.f)
+		f1 = 360.0f + OldAngleY;
+	else
+		f1 = OldAngleY;
+
+	if (angSentView.y < 0.0f)
+		f2 = 360.0f + angSentView.y;
+	else
+		f2 = angSentView.y;
+
+	if (f2 < f1)
+		deltaView = abs(f2 - f1);
+	else
+		deltaView = 360.0f - abs(f1 - f2);
+	deltaView = 360.0f - deltaView;
+
+	pCmd->flForwardMove = cos(M::Deg2rad(deltaView)) * fOldForward + cos(M::Deg2rad(deltaView + 90.f)) * fOldSidemove;
+	pCmd->flSideMove = sin(M::Deg2rad(deltaView)) * fOldForward + sin(M::Deg2rad(deltaView + 90.f)) * fOldSidemove;
 }
 
 float CAntiAim::GetMaxDesyncDelta(CCSGOPlayerAnimState* pAnimState)

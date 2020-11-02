@@ -127,7 +127,7 @@ void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
 	}
 
 	// Backup the DX9 state
-	// modified by qo0
+	// modified by kbk
 	// used D3DSBT_PIXELSTATE instead D3DSBT_ALL to fix game material render artifacts
 	IDirect3DStateBlock9* d3d9_state_block = NULL;
 	if (g_pd3dDevice->CreateStateBlock(D3DSBT_PIXELSTATE, &d3d9_state_block) != D3D_OK)
@@ -137,7 +137,7 @@ void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
 	if (d3d9_state_block->Capture() != D3D_OK)
 		return;
 
-	// modified by qo0
+	// modified by kbk
 	// backup vertex states to compensate stateblock changes
 	IDirect3DVertexDeclaration9* vertex_declaration;
 	IDirect3DVertexShader9* vertex_shader;
@@ -225,7 +225,7 @@ void ImGui_ImplDX9_RenderDrawData(ImDrawData* draw_data)
 	g_pd3dDevice->SetTransform(D3DTS_VIEW, &last_view);
 	g_pd3dDevice->SetTransform(D3DTS_PROJECTION, &last_projection);
 
-	// modified by qo0
+	// modified by kbk
 	// Restore the DX9 vertex states
 	g_pd3dDevice->SetVertexDeclaration(vertex_declaration);
 	g_pd3dDevice->SetVertexShader(vertex_shader);

@@ -10,8 +10,6 @@
 
 #define PI 3.14159265358979323846f
 #define MAXBACKTRACKTICKS ((int)C::Get<float>(Vars.flBacktrack))
-#define TICK_INTERVAL	(I::Globals->flIntervalPerTick)
-#define TIME_TO_TICKS( dt )	( (int)( 0.5f + (float)(dt) / TICK_INTERVAL ) )
 
 inline Vector angle_vector(QAngle meme)
 {

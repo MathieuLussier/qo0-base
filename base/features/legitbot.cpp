@@ -183,11 +183,17 @@ void CLegitBot::Aimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 	if (best_ent_index > -1) {
 		CBaseEntity* ent_toAim = I::ClientEntityList->Get<CBaseEntity>(best_ent_index);
 
-		Vector local_head_pos = pLocal->GetEyePosition();
 		EHitboxIndex closest_hitbox = CLegitBot::findClosestHitBox(pLocal, ent_toAim);
 
 		if (closest_hitbox > HITBOX_INVALID) {
+			CBasePlayerAnimState* local_anim_state = pLocal->GetAnimationState();
+			Vector local_head_pos = pLocal->GetEyePosition();
+			local_head_pos.x += (local_anim_state->vecVelocity.x * I::Globals->flIntervalPerTick);
+			local_head_pos.y += (local_anim_state->vecVelocity.y * I::Globals->flIntervalPerTick);
+			CBasePlayerAnimState* anim_state = ent_toAim->GetAnimationState();
 			Vector aim_pos = ent_toAim->GetHitboxPosition(closest_hitbox).value();
+			aim_pos.x += (anim_state->vecVelocity.x * I::Globals->flIntervalPerTick);
+			aim_pos.y += (anim_state->vecVelocity.y * I::Globals->flIntervalPerTick);
 			QAngle angles_to_aim = M::CalcAngle(local_head_pos, aim_pos).Normalize();
 			
 			if (!pLocal->IsVisible(ent_toAim, aim_pos, true) || U::LineGoesThroughSmoke(local_head_pos, aim_pos))

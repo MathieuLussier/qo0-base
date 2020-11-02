@@ -1061,7 +1061,7 @@ enum ImGuiCol_
     ImGuiCol_FrameBgHovered,
     ImGuiCol_FrameBgActive,
 	
-	// modified by qo0
+	// modified by kbk
 	ImGuiCol_ControlBg, // color entries for Checkbox, BeginCombo, SliderScalar, InputTextEx
 	ImGuiCol_ControlBgHovered,
 	ImGuiCol_ControlBgActive,
@@ -1101,7 +1101,7 @@ enum ImGuiCol_
     ImGuiCol_TextSelectedBg,
     ImGuiCol_DragDropTarget,
 
-	// modified by qo0
+	// modified by kbk
 	ImGuiCol_Triangle,				// state trinagle of treenode, combo, etc
 
     ImGuiCol_NavHighlight,          // Gamepad/keyboard: current highlighted item

@@ -19,15 +19,59 @@ public:
 	// Global Values
 	CBaseEntity* pBestEntity = nullptr;
 private:
-	// Main
-	/* get entities, choose best target, aim */
+	void UpdateSettings(CUserCmd* pCmd, CBaseEntity* pLocal);
+	void Rage(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
+	void DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
+	int HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* pWeapon, CBaseEntity* pLocal);
+	bool IsAbleToShoot(CBaseEntity* pLocal);
+	bool CanOpenFire(CBaseEntity* pLocal);
+	Vector BestPoint(CBaseEntity* targetPlayer, Vector & final, CBaseEntity* pLocal);
+	bool TargetMeetsRequirements(CBaseEntity* pEntity, CBaseEntity* pLocal);
+	float FovToPlayer(Vector ViewOffSet, QAngle View, CBaseEntity* pEntity, int aHitBox);
+	int GetTargetCrosshair(CBaseEntity* pLocal);
+	int GetTargetDistance(CBaseEntity* pLocal);
+	int GetTargetHealth(CBaseEntity* pLocal);
+	int HitScan(CBaseEntity* pEntity, CBaseEntity* pLocal);
+	void DoNoRecoil(CBaseEntity* pLocal);
+	void PositionAdjustment(CUserCmd* pCmd, CBaseEntity* pLocal);
+	bool AimAtPoint(CBaseEntity* pLocal, Vector point, CUserCmd* pCmd, bool& bSendPacket);
+	void Autostop(CUserCmd* cmd, CBaseEntity* pLocal);
 
-	// Other
-	/* 3-rd party functions */
+	int ihitchance;
+	int imin_damage;
+	int itarget;
+	bool bAimStep;
+	bool bPreferBodyAim;
+	int iAimType;
+	bool bPositionAdjustment;
+	bool bAimbotEnable;
+	bool bDoNoRecoil;
+	bool bAutoScope;
+	bool bAimbotAutoFire;
+	bool bAccuracyAutoStop;
+	bool bAimbotAutoPistol;
+	int iTargetSelection;
+	int iSmart;
+	int iAimScanType;
+	CBaseEntity* Target;
+	QAngle LastAngle;
+	int Shots;
+	bool bHitboxHead;
+	bool bHitboxChest;
+	bool bHitboxStomach;
+	bool bAutoWall;
+	bool bHitboxArms;
+	bool bHitboxlegs;
+	float flPointScale;
+	float flHeadPointScale;
+	float flChestPointScale;
 
-	// Check
-	/* is entity valid */
+	bool IsAimStepping;
+	QAngle LastAimstepAngle;
 
-	// Values
-	/* hitbox position other info */
+	bool IsLocked; 
+	int TargetID;
+	int HitBox;
+	Vector AimPoint;
+	CUserCmd* cmd;
 };

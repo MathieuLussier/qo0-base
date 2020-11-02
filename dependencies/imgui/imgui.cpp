@@ -4181,7 +4181,7 @@ void ImGui::Render()
 
     // Draw software mouse cursor if requested
     if (g.IO.MouseDrawCursor)
-		// modified by qo0
+		// modified by kbk
         RenderMouseCursor(&g.ForegroundDrawList, g.IO.MousePos, g.Style.MouseCursorScale, g.MouseCursor, IM_COL32(140, 40, 225, 100), IM_COL32_BLACK, IM_COL32(0, 0, 0, 48));
 
     // Add foreground ImDrawList

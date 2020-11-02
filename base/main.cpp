@@ -37,14 +37,14 @@ DWORD WINAPI OnDllAttach(LPVOID lpParameter)
 
 		#ifdef DEBUG_CONSOLE
 		// console logging
-		if (!L::Attach(XorStr("qo0's base developer-mode")))
+		if (!L::Attach(XorStr("kbk's base developer-mode")))
 			throw std::runtime_error(XorStr("failed to attach console"));
 
 		L::Print(XorStr("console opened"));
 		#else
 		// file logging
 		// @note: use std::ios::app instead std::ios::trunc to not clear every time
-		L::ofsFile.open(C::GetWorkingPath().append(XorStr("qo0base.log")), std::ios::out | std::ios::trunc);
+		L::ofsFile.open(C::GetWorkingPath().append(XorStr("kbkbase.log")), std::ios::out | std::ios::trunc);
 		#endif
 
 		// capture interfaces from game/steam (not always) modules
@@ -67,7 +67,7 @@ DWORD WINAPI OnDllAttach(LPVOID lpParameter)
 		 * fill networkable variables map
 		 * dump received netvars to the file
 		 */
-		if (!CNetvarManager::Get().Setup(XorStr("netvars.qo0")))
+		if (!CNetvarManager::Get().Setup(XorStr("netvars.kbk")))
 			throw std::runtime_error(XorStr("failed to initialize netvars"));
 
 		L::Print(fmt::format(XorStr("found [{:d}] props in [{:d}] tables"), CNetvarManager::Get().iStoredProps, CNetvarManager::Get().iStoredTables));
@@ -108,7 +108,7 @@ DWORD WINAPI OnDllAttach(LPVOID lpParameter)
 		L::Print(XorStr("proxies applied"));
 
 		// setup values to save/load cheat variables in/from files and load default configuration
-		if (!C::Setup(XorStr("default.qo0")))
+		if (!C::Setup(XorStr("default.kbk")))
 		{
 			// this error is not critical, only show that
 			L::PushConsoleColor(FOREGROUND_RED);
@@ -120,25 +120,17 @@ DWORD WINAPI OnDllAttach(LPVOID lpParameter)
 
 		// show message about successful load in logs and in game console
 		L::PushConsoleColor(FOREGROUND_MAGENTA);
-		L::Print(XorStr("qo0 base successfully loaded"));
+		L::Print(XorStr("kbk base successfully loaded"));
 		L::PopConsoleColor();
 		I::GameConsole->Clear();
-		I::ConVar->ConsoleColorPrintf(Color(255, 50, 255, 255), XorStr("qo0 base successfully loaded.\nbuild date: %s / %s\n"), __DATE__, __TIME__);
+		I::ConVar->ConsoleColorPrintf(Color(255, 50, 255, 255), XorStr("kbk base successfully loaded.\nbuild date: %s / %s\n"), __DATE__, __TIME__);
 	}
 	catch (const std::exception& ex)
 	{
-		// print error message
-		L::PushConsoleColor(FOREGROUND_INTENSE_RED);
-		L::Print(fmt::format(XorStr("[error] {}"), ex.what()));
-		L::PopConsoleColor();
-
-		#ifdef _DEBUG
-		// show error message window (or replace to your exception handler)
-		_RPT0(_CRT_ERROR, ex.what());
-		#else
-		// unload
-		FreeLibraryAndExitThread(static_cast<HMODULE>(lpParameter), EXIT_FAILURE);
-		#endif
+		// show error message (or replace to your exception handler)
+		MessageBox(nullptr, ex.what(), XorStr("kbk base (error)"), MB_OK | MB_ICONERROR | MB_TOPMOST);
+		// exit from process (passed EXIT_SUCCESS to prevent game knowns unwanted errors)
+		FreeLibraryAndExitThread((HMODULE)lpParameter, EXIT_SUCCESS);
 	}
 
 	return 1UL;
@@ -196,7 +188,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 		// basic process check
 		if (GetModuleHandle(XorStr("csgo.exe")) == nullptr)
 		{
-			MessageBox(nullptr, XorStr("this cannot be injected in another process\nopen <csgo.exe> to inject"), XorStr("qo0 base"), MB_OK);
+			MessageBox(nullptr, XorStr("this cannot be injected in another process\nopen <csgo.exe> to inject"), XorStr("kbk cheats"), MB_OK);
 			return FALSE;
 		}
 

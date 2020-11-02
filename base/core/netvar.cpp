@@ -21,7 +21,7 @@ bool CNetvarManager::Setup(std::string_view szDumpFileName)
 
 	if (fsDumpFile.good())
 		// write current date, time and info
-		fsDumpFile << szTime << XorStr("qo0 | netvars dump\n\n");
+		fsDumpFile << szTime << XorStr("kbk | netvars dump\n\n");
 	#endif
 
 	for (auto pClass = I::Client->GetAllClasses(); pClass != nullptr; pClass = pClass->pNext)

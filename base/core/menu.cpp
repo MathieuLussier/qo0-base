@@ -102,7 +102,7 @@ void W::MainWindow(IDirect3DDevice9* pDevice)
 			if (I::Engine->IsInGame())
 				ImGui::TextColored(G::bSendPacket ? ImVec4(0.0f, 1.0f, 0.0f, 1.0f) : ImVec4(1.0f, 0.0f, 0.0f, 1.0f), XorStr("send packets"));
 
-			const char* const szName = XorStr("qo0 base | " __DATE__);
+			const char* const szName = XorStr("KbK Cheats | " __DATE__);
 			static ImVec2 vecNameSize = ImGui::CalcTextSize(szName);
 			ImGui::SameLine(ImGui::GetWindowContentRegionWidth() - vecNameSize.x);
 			ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), szName);
@@ -131,7 +131,7 @@ void W::MainWindow(IDirect3DDevice9* pDevice)
 
 		ImGui::SetNextWindowPos(ImVec2(vecScreenSize.x * 0.5f, vecScreenSize.y * 0.5f), ImGuiCond_Once, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(500, 327), ImGuiCond_Always);
-		ImGui::Begin(XorStr("qo0 base"), &bMainOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse);
+		ImGui::Begin(XorStr("KbK Cheats"), &bMainOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse);
 		{
 			const ImVec2 vecPosition = ImGui::GetCursorScreenPos();
 			const float flWindowWidth = ImGui::GetWindowWidth();
@@ -218,6 +218,31 @@ void T::RageBot()
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
 
+			ImGui::Checkbox(XorStr("auto fire"), &C::Get<bool>(Vars.bRageAutoFire));
+			ImGui::Combo(XorStr("aim type"), &C::Get<int>(Vars.iRageAimType), XorStr("normal\0silent\0psilent\0\0"));
+			ImGui::SliderInt(XorStr("hitchance"), &C::Get<int>(Vars.ihitchance), 0, 100, "%d Unit");
+			ImGui::SliderInt(XorStr("minimum damage"), &C::Get<int>(Vars.imin_damage), 0, 100, "%d Unit");
+			ImGui::SliderInt(XorStr("smart aim"), &C::Get<int>(Vars.iSmart), 0, 20, "%d Unit");
+			ImGui::Combo(XorStr("hitscan mode"), &C::Get<int>(Vars.iHitScanMode), XorStr("off\0low\0normal\0high\0extreme\0\0"));
+			if (C::Get<int>(Vars.iHitScanMode) == 0) {
+				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecRageTargetHitbox), IM_ARRAYSIZE(arrHitboxes));
+			}
+			ImGui::Checkbox(XorStr("aimstep"), &C::Get<bool>(Vars.bAimStep));
+			ImGui::Checkbox(XorStr("prefer body aim"), &C::Get<bool>(Vars.bPreferBodyAim));
+			ImGui::Checkbox(XorStr("auto wall"), &C::Get<bool>(Vars.bRageAutoWall));
+			ImGui::Checkbox(XorStr("no recoil"), &C::Get<bool>(Vars.bNoRecoil));
+			ImGui::Checkbox(XorStr("auto scope"), &C::Get<bool>(Vars.bAutoScope));
+			ImGui::Checkbox(XorStr("auto stop"), &C::Get<bool>(Vars.bAccuracyAutoStop));
+			ImGui::Checkbox(XorStr("auto pistol"), &C::Get<bool>(Vars.bAimbotAutoPistol));
+			ImGui::Checkbox(XorStr("position ajustment"), &C::Get<bool>(Vars.bPositionAdjustment));
+			ImGui::Combo(XorStr("target selection"), &C::Get<int>(Vars.iTargetSelection), XorStr("crosshair\0distance\0health\0\0"));
+
+			ImGui::SliderFloat(XorStr("point scale"), &C::Get<float>(Vars.flPointScale), 0.f, 10.f, "%.1f Deg");
+
+			// ImGui::SliderFloat(XorStr("head scale"), &C::Get<float>(Vars.flHeadPointScale), 0.f, 20.f, "%.1f radius");
+
+			// ImGui::SliderFloat(XorStr("chest scale"), &C::Get<float>(Vars.flChestPointScale), 0.f, 20.f, "%.1f radius");
+
 			ImGui::PopStyleVar();
 
 
@@ -238,8 +263,8 @@ void T::RageBot()
 			}
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
-			ImGui::Combo(XorStr("pitch"), &C::Get<int>(Vars.iAntiAimPitch), XorStr("none\0up\0down\0zero (untrusted)\0\0"));
-			ImGui::Combo(XorStr("yaw"), &C::Get<int>(Vars.iAntiAimYaw), XorStr("none\0desync\0\0"));
+			ImGui::Combo(XorStr("pitch"), &C::Get<int>(Vars.iAntiAimPitch), XorStr("none\0up\0down\0\0"));
+			ImGui::Combo(XorStr("yaw"), &C::Get<int>(Vars.iAntiAimYaw), XorStr("none\0desync\0jitter\0backjitter\0\0"));
 
 			if (C::Get<int>(Vars.iAntiAimYaw) == (int)EAntiAimYawType::DESYNC)
 				ImGui::HotKey(XorStr("desync switch"), &C::Get<int>(Vars.iAntiAimDesyncKey));

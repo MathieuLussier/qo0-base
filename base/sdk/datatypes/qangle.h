@@ -35,6 +35,12 @@ public:
 		return *this;
 	}
 
+	constexpr QAngle& operator+=(const Vector& becBase)
+	{
+		this->x += becBase.x; this->y += becBase.y; this->z += becBase.z;
+		return *this;
+	}
+
 	constexpr QAngle& operator-=(const QAngle& angBase)
 	{
 		this->x -= angBase.x; this->y -= angBase.y; this->z -= angBase.z;

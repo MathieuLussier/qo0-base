@@ -23,6 +23,15 @@ enum EVisualsRemovals : int
 #pragma endregion
 
 #pragma region variables_combo_entries
+
+enum class EHitScanMode : int
+{
+	LOW = 0,
+	NORMAL,
+	HIGH,
+	EXTREME
+};
+
 enum class EAntiAimPitchType : int
 {
 	NONE = 0,
@@ -31,10 +40,26 @@ enum class EAntiAimPitchType : int
 	ZERO
 };
 
+enum class EAimType : int
+{
+	NORMAL = 0,
+	SILENT,
+	PSILENT
+};
+
+enum class ETargetSelection : int
+{
+	CROSSHAIR = 0,
+	DISTANCE,
+	HEALTH
+};
+
 enum class EAntiAimYawType : int
 {
 	NONE = 0,
-	DESYNC
+	DESYNC,
+	Jitter,
+	BackJitter
 };
 
 enum class EVisualsBoxType : int
@@ -74,8 +99,30 @@ enum class EVisualsViewModelChams : int
 struct Variables_t
 {
 	#pragma region variables_rage
-	// aimbot
+	// ragebot
 	C_ADD_VARIABLE(bool, bRage, false);
+
+	C_ADD_VARIABLE(int, iRageAimType, 0);
+	
+	C_ADD_VARIABLE(int, ihitchance, 0);
+	C_ADD_VARIABLE(int, imin_damage, 0);
+
+	C_ADD_VARIABLE(int, iHitScanMode, 0);
+	C_ADD_VARIABLE_VECTOR(bool, 5, vecRageTargetHitbox, false);
+	C_ADD_VARIABLE(bool, bAimStep, false);
+	C_ADD_VARIABLE(bool, bPreferBodyAim, false);
+	C_ADD_VARIABLE(bool, bNoRecoil, false);
+	C_ADD_VARIABLE(bool, bAutoScope, false);
+	C_ADD_VARIABLE(bool, bRageAutoFire, false);
+	C_ADD_VARIABLE(bool, bPositionAdjustment, false);
+	C_ADD_VARIABLE(bool, bAccuracyAutoStop, false);
+	C_ADD_VARIABLE(bool, bAimbotAutoPistol, false);
+	C_ADD_VARIABLE(bool, bRageAutoWall, false);
+	C_ADD_VARIABLE(int, iTargetSelection, 0);
+	C_ADD_VARIABLE(int, iSmart, 1);
+	C_ADD_VARIABLE(float, flPointScale, 5.f);
+	//C_ADD_VARIABLE(float, flHeadPointScale, 0.f);
+	//C_ADD_VARIABLE(float, flChestPointScale, 0.f);
 
 	// antiaim
 	C_ADD_VARIABLE(bool, bAntiAim, false);

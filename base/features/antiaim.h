@@ -23,14 +23,21 @@ private:
 	// Main
 	void Pitch(CUserCmd* pCmd, CBaseEntity* pLocal);
 	void Yaw(CUserCmd* pCmd, CBaseEntity* pLocal, float flServerTime, bool& bSendPacket);
+	void CorrectMovement(float OldAngleY, CUserCmd* pCmd, float fOldForward, float fOldSidemove);
 
 	// Extra
 	/* returns max server desynchronization angle delta */
 	float GetMaxDesyncDelta(CCSGOPlayerAnimState* pAnimState); // @credits: sharklaser1's reversed setupvelocity
+
+	void Desync(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta, bool& bSendPacket);
+	void Jitter(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta, bool& bSendPacket);
+	void BackJitter(CUserCmd* pCmd);
 
 	// Values
 	/* updated by server animstate */
 	CCSGOPlayerAnimState* pServerAnimState = nullptr;
 	/* next lower body yaw update time from server */
 	float flNextLowerBodyUpdate = 0.f;
+	float lbyNextUpdate = 0.f;
+	QAngle LastAngle;
 };

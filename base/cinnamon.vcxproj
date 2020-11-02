@@ -311,6 +311,7 @@
       </BufferSecurityCheck>
       <RuntimeTypeInfo>
       </RuntimeTypeInfo>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

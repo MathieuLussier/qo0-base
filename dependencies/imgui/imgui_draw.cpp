@@ -1754,7 +1754,7 @@ ImFont* ImFontAtlas::AddFontDefault(const ImFontConfig* font_cfg_template)
 
 	if (font_cfg.Name[0] == '\0') strcpy(font_cfg.Name, "Tahoma.ttf, 13px");
 
-	// modified by qo0
+	// modified by kbk
 	ImFont* pFont = AddFontFromFileTTF("C:\\Windows\\Fonts\\Tahoma.ttf", 13.f, &font_cfg, GetGlyphRangesCyrillic());
 	pFont->DisplayOffset.y = 1.0f;
 	return pFont;
