@@ -19,6 +19,15 @@ struct SkinObject_t
 	const char* szKillIcon = nullptr;
 };
 
+struct EconomyItemCfg {
+	int nFallbackPaintKit = 0;
+	int nFallbackSeed = 0;
+	int nFallbackStatTrak = -1;
+	int iEntityQuality = 4;
+	char* szCustomName = nullptr;
+	float flFallbackWear = 0.1f;
+};
+
 // @note: u can find viewmodel indexes with "sv_precacheinfo"
 const std::unordered_map<int, SkinObject_t> mapItemList =
 {
@@ -105,4 +114,6 @@ public:
 	void Dump();
 private:
 	/* ur values and main functionality */
+	std::unordered_map<int, EconomyItemCfg> g_SkinChangerCfg;
+	bool ApplyCustomSkin(CBaseEntity* pLocal, CBaseCombatWeapon* pWeapon);
 };

@@ -259,6 +259,9 @@ bool FASTCALL H::hkCreateMove(IClientModeShared* thisptr, int edx, float flInput
 	// @note: need do bunnyhop and other movements before prediction
 	CMiscellaneous::Get().Run(pCmd, pLocal, bSendPacket);
 
+	if (C::Get<bool>(Vars.bRage) && pLocal->IsAlive())
+		CRageBot::Get().AutoRevolver(pCmd, pLocal);
+
 	/*
 	 * CL_RunPrediction
 	 * correct prediction when framerate is lower than tickrate
@@ -278,10 +281,10 @@ bool FASTCALL H::hkCreateMove(IClientModeShared* thisptr, int edx, float flInput
 		if (C::Get<bool>(Vars.bRage))
 			CRageBot::Get().Run(pCmd, pLocal, bSendPacket);
 
-		if (C::Get<bool>(Vars.bLegit))
+		if (C::Get<bool>(Vars.bLegit) && pLocal->IsAlive())
 			CLegitBot::Get().Run(pCmd, pLocal, bSendPacket);
 
-		if (C::Get<bool>(Vars.bTrigger))
+		if (C::Get<bool>(Vars.bTrigger) && pLocal->IsAlive())
 			CTriggerBot::Get().Run(pCmd, pLocal);
 
 		if (C::Get<bool>(Vars.bAntiAim))
@@ -412,7 +415,8 @@ void FASTCALL H::hkFrameStageNotify(IBaseClientDll* thisptr, int edx, EClientFra
 		 * data has been received and we are going to start calling postdataupdate
 		 * e.g. resolver or skinchanger and other visuals
 		 */
-
+		if (C::Get<bool>(Vars.bSkinChanger))
+			CSkinChanger::Get().Run();
 		break;
 	}
 	case FRAME_NET_UPDATE_POSTDATAUPDATE_END:
@@ -780,6 +784,7 @@ bool FASTCALL H::hkSvCheatsGetBool(CConVar* thisptr, int edx)
 
 	return oSvCheatsGetBool(thisptr, edx);
 }
+
 
 long CALLBACK H::hkWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {

@@ -46,12 +46,13 @@ void CRageBot::UpdateSettings(CUserCmd* pCmd, CBaseEntity* pLocal) {
     bHitboxArms = hitboxes[3];
     bHitboxlegs = hitboxes[4];
 
-    flPointScale = C::Get<float>(Vars.flPointScale);
+    // flPointScale = C::Get<float>(Vars.flPointScale);
     flHeadPointScale = 0.f;
     flChestPointScale = 0.f;
 
     iSmart = C::Get<int>(Vars.iSmart);
     bAutoWall = C::Get<bool>(Vars.bRageAutoWall);
+    bBestPoint = C::Get<bool>(Vars.bBestPoint);
 }
 
 void CRageBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
@@ -75,7 +76,7 @@ void CRageBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	if (weapon_recoil_scale == nullptr)
 		return;
 
-	if (!pLocal->CanShoot(static_cast<CWeaponCSBase*>(pWeapon)) || pWeapon->GetAmmo() == 0 || !pWeapon->IsWeapon() || pWeaponData->nWeaponType == WEAPONTYPE_KNIFE || pWeaponData->nWeaponType == WEAPONTYPE_GRENADE || pWeaponData->nWeaponType == WEAPONTYPE_FISTS || pWeaponData->nWeaponType == WEAPONTYPE_C4)
+	if (pWeapon->GetAmmo() == 0 || !pWeapon->IsWeapon() || pWeaponData->nWeaponType == WEAPONTYPE_KNIFE || pWeaponData->nWeaponType == WEAPONTYPE_GRENADE || pWeaponData->nWeaponType == WEAPONTYPE_FISTS || pWeaponData->nWeaponType == WEAPONTYPE_C4)
 		return;
 
 	CRageBot::UpdateSettings(pCmd, pLocal);
@@ -96,23 +97,32 @@ void CRageBot::Rage(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
     if (bDoNoRecoil)
         CRageBot::DoNoRecoil(pLocal);
 
-    // Aimstep
-    if (IsAimStepping)
-    {
-        QAngle AddAngs = pCmd->angViewPoint - LastAngle;
-        if (AddAngs.Length() > 25.f)
-        {
-            AddAngs.Normalize();
-
-            AddAngs *= 25.f;
-            pCmd->angViewPoint = (LastAngle + AddAngs).Normalize();
-        }
-    }
-
     LastAngle = pCmd->angViewPoint;
 }
 
-void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) // Creds to encore1337 for getting it to work
+void CRageBot::AutoRevolver(CUserCmd* pCmd, CBaseEntity* pLocal)
+{
+    CBaseCombatWeapon* pWeapon = pLocal->GetWeapon();
+
+    // Auto Revolver
+    if (pWeapon->GetItemDefinitionIndex() == WEAPON_REVOLVER) {
+
+        constexpr auto timeToTicks = [](float time) {  return static_cast<int>(0.5f + time / I::Globals->flIntervalPerTick); };
+        constexpr float revolverPrepareTime{ 0.234375f };
+
+        static float readyTime;
+
+
+        if (!readyTime) readyTime = I::Globals->flCurrentTime + revolverPrepareTime;
+        auto ticksToReady = timeToTicks(readyTime - I::Globals->flCurrentTime - I::Engine->GetNetChannelInfo()->GetLatency(0));
+        if (ticksToReady > 0 && ticksToReady <= timeToTicks(revolverPrepareTime))
+            pCmd->iButtons |= IN_ATTACK;
+        else
+            readyTime = 0.0f;
+    }
+}
+
+void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 {
     CBaseEntity* pTarget = nullptr;
     Vector Start = pLocal->GetEyePosition();
@@ -189,14 +199,11 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) 
             return;
 
 
-        float pointscale = flPointScale - 5.f; // Aim height
-//		float value = Menu::Window.RageBotTab.AccuracyHitchance.GetValue(); // Hitchance
-
         Vector Point;
-        Vector AimPoint = pTarget->GetHitboxPosition(HitBox).value() + Vector(0, 0, pointscale);
+        Vector AimPoint = pTarget->GetHitboxPosition(HitBox).value();
 
 
-        if (false)
+        if (bBestPoint)
         {
             Point = BestPoint(pTarget, AimPoint, pLocal);
         }
@@ -204,11 +211,6 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) 
         {
             Point = AimPoint;
         }
-
-        //CBasePlayerAnimState* anim_state = pTarget->GetAnimationState();
-        //Vector aim_pos = pTarget->GetHitboxPosition(HitBox).value();
-        //Point.x += (anim_state->vecVelocity.x * I::Globals->flIntervalPerTick);
-        //Point.y += (anim_state->vecVelocity.y * I::Globals->flIntervalPerTick);
         
         static float MinimumVelocity = 0.0f;
 
@@ -242,15 +244,14 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) 
                     {
                         pCmd->iButtons |= IN_ATTACK;
                     }
-                    else
-                    {
+                    else {
                         return;
                     }
                 }
-                else if (bAimbotAutoFire && !(pCmd->iButtons & IN_ATTACK))
-                {
+                else if (bAimbotAutoFire && !(pCmd->iButtons & IN_ATTACK)) {
                     pCmd->iButtons |= IN_ATTACK;
                 }
+                
             }
         }
 
@@ -259,7 +260,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) 
     }
 
     // Auto Pistol
-    if (weapInfo->nWeaponType == WEAPONTYPE_PISTOL && bAimbotAutoPistol)
+    if (weapInfo->nWeaponType == WEAPONTYPE_PISTOL && bAimbotAutoPistol && !pWeapon->GetItemDefinitionIndex() == WEAPON_REVOLVER)
     {
         if (pCmd->iButtons & IN_ATTACK)
         {
@@ -781,7 +782,7 @@ void CRageBot::DoNoRecoil(CBaseEntity* pLocal)
     if (pLocal->IsAlive()) {
         QAngle punch = pLocal->GetPunch();
 
-        if (punch.x == 0.f && punch.y == 0.f && punch.z == 0.f)
+        if ((punch.x > 0.f && punch.y > 0.f && punch.z > 0.f) && (punch.x < 150.f && punch.y < 150.f && punch.z < 150.f))
             return;
 
         cmd->angViewPoint -= (punch * 2.f).Normalize();
@@ -822,7 +823,7 @@ void CRageBot::PositionAdjustment(CUserCmd* pCmd, CBaseEntity* pLocal)
 
     int iTargetTickDiff = (int)(0.5f + (flSimTime - flOldAnimTime) / I::Globals->flIntervalPerTick);
 
-    int result = (int)floorf(TIME_TO_TICKS(cl_interp)) + (int)floorf(TIME_TO_TICKS(pLocal->GetSimulationTime()));
+    int result = (int)((int)(floorf(TIME_TO_TICKS(cl_interp))) + (int)floorf(TIME_TO_TICKS(pLocal->GetSimulationTime())));
 
     if ((result - pCmd->iTickCount) >= -50)
     {
@@ -837,7 +838,7 @@ bool CRageBot::AimAtPoint(CBaseEntity* pLocal, Vector point, CUserCmd* pCmd, boo
     if (point.Length() == 0) return ReturnValue;
 
     QAngle angles;
-    Vector src = pLocal->GetEyePosition();
+    Vector src = pLocal->GetOrigin() + pLocal->GetViewOffset();
 
     angles = M::CalcAngle(src, point).Normalize();
 
@@ -849,29 +850,11 @@ bool CRageBot::AimAtPoint(CBaseEntity* pLocal, Vector point, CUserCmd* pCmd, boo
     IsLocked = true;
     //-----------------------------------------------
 
-    // Aim Step Calcs
-    //Vector ViewOffset = pLocal->GetOrigin() + pLocal->GetViewOffset();
-    //if (!IsAimStepping)
-    //    LastAimstepAngle = LastAngle; // Don't just use the viewangs because you need to consider aa
-
-    //float fovLeft = FovToPlayer(ViewOffset, LastAimstepAngle, I::ClientEntityList->Get<CBaseEntity>(TargetID), 0);
-
-    //if (fovLeft > 25.0f && bAimStep)
-    //{
-    //    QAngle AddAngs = (angles - LastAimstepAngle).Normalize();
-    //    AddAngs *= 25;
-    //    LastAimstepAngle += AddAngs;
-    //    LastAimstepAngle.Normalize();
-    //    angles = LastAimstepAngle;
-    //}
-    //else
-    //{
-    //    ReturnValue = true;
-    //}
 
     // pSilent Aim 
     QAngle Oldview = pCmd->angViewPoint;
     static int ChokedPackets = -1;
+    angles.Normalize();
     switch (iAimType)
     {
     case 0:
@@ -881,6 +864,8 @@ bool CRageBot::AimAtPoint(CBaseEntity* pLocal, Vector point, CUserCmd* pCmd, boo
         pCmd->angViewPoint = angles;
         break;
     case 2:
+    {
+        static int ChokedPackets = -1;
         ChokedPackets++;
 
         if (ChokedPackets < 6)
@@ -896,11 +881,10 @@ bool CRageBot::AimAtPoint(CBaseEntity* pLocal, Vector point, CUserCmd* pCmd, boo
             ReturnValue = false;
         }
         break;
+    }
     default:
         I::Engine->SetViewAngles(angles);
     }
-
-
     return ReturnValue;
 }
 

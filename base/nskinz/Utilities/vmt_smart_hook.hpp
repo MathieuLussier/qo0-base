@@ -23,32 +23,27 @@
 * SOFTWARE.
 */
 #pragma once
-#include "platform.hpp"
-#include <cstring>
+
 #include <cassert>
+#include <cstring>
 
-using proc_t = void(*)();
+#include "Platform.hpp"
 
-class vmt_base_hook
+class table_hook
 {
-protected:
-	constexpr vmt_base_hook() = default;
-
 public:
-  ~vmt_base_hook()
+	constexpr table_hook()
+		: m_new_vmt{nullptr}
+		, m_old_vmt{nullptr} {}
+
+	~table_hook()
 	{
 		if(m_new_vmt)
 			delete[] (m_new_vmt - 1);
 	}
 
-  vmt_base_hook(const vmt_base_hook&) = delete;
-  vmt_base_hook(vmt_base_hook&&) = delete;
-
-  vmt_base_hook& operator=(const vmt_base_hook&) = delete;
-  vmt_base_hook& operator=(vmt_base_hook&&) = delete;
-
 protected:
-	auto initialize(proc_t* original_table) -> void
+	auto initialize(void** original_table) -> void
 	{
 		m_old_vmt = original_table;
 
@@ -56,7 +51,7 @@ protected:
 		while(m_old_vmt[size] && platform::is_code_ptr(m_old_vmt[size]))
 			++size;
 
-		m_new_vmt = (new proc_t[size + 1]) + 1;
+		m_new_vmt = (new void*[size + 1]) + 1;
 		//std::copy(m_old_vmt - 1, m_old_vmt + size, m_new_vmt - 1);
 		memcpy(m_new_vmt - 1, m_old_vmt - 1, sizeof(void*) * (size + 1));
 	}
@@ -68,21 +63,21 @@ protected:
 
 	auto hook_instance(void* inst) const -> void
 	{
-		auto& vtbl = *reinterpret_cast<proc_t**>(inst);
+		auto& vtbl = *reinterpret_cast<void***>(inst);
 		assert(vtbl == m_old_vmt || vtbl == m_new_vmt);
 		vtbl = m_new_vmt;
 	}
 
 	auto unhook_instance(void* inst) const -> void
 	{
-		auto& vtbl = *reinterpret_cast<proc_t**>(inst);
+		auto& vtbl = *reinterpret_cast<void***>(inst);
 		assert(vtbl == m_old_vmt || vtbl == m_new_vmt);
 		vtbl = m_old_vmt;
 	}
 
 	auto initialize_and_hook_instance(void* inst) -> bool
 	{
-		auto& vtbl = *reinterpret_cast<proc_t**>(inst);
+		auto& vtbl = *reinterpret_cast<void***>(inst);
 		auto initialized = false;
 		if(!m_old_vmt)
 		{
@@ -96,7 +91,7 @@ protected:
 	template <typename Fn>
 	auto hook_function(Fn hooked_fn, const std::size_t index) -> Fn
 	{
-		m_new_vmt[index] = (proc_t)(hooked_fn);
+		m_new_vmt[index] = (void*)(hooked_fn);
 		return (Fn)(m_old_vmt[index]);
 	}
 
@@ -113,11 +108,11 @@ protected:
 	}
 
 private:
-	proc_t* m_new_vmt = nullptr;
-	proc_t* m_old_vmt = nullptr;
+	void** m_new_vmt = nullptr;
+	void** m_old_vmt = nullptr;
 };
 
-class vmt_smart_hook : vmt_base_hook
+class vmt_smart_hook : table_hook
 {
 public:
 	vmt_smart_hook(void* class_base)
@@ -131,12 +126,6 @@ public:
 		unhook_instance(m_class);
 	}
 
-  vmt_smart_hook(const vmt_smart_hook&) = delete;
-  vmt_smart_hook(vmt_smart_hook&&) = delete;
-
-  vmt_smart_hook& operator=(const vmt_smart_hook&) = delete;
-  vmt_smart_hook& operator=(vmt_smart_hook&&) = delete;
-
 	auto rehook() const -> void
 	{
 		hook_instance(m_class);
@@ -147,35 +136,29 @@ public:
 		unhook_instance(m_class);
 	}
 
-	using vmt_base_hook::apply_hook;
-	using vmt_base_hook::get_original_function;
-	using vmt_base_hook::hook_function;
+	using table_hook::apply_hook;
+	using table_hook::get_original_function;
+	using table_hook::hook_function;
 
 private:
 	void* m_class = nullptr;
 };
 
-class vmt_multi_hook : vmt_base_hook
+class vmt_multi_hook : table_hook
 {
 public:
-	constexpr vmt_multi_hook() = default;
+	constexpr vmt_multi_hook() {}
 
-  ~vmt_multi_hook()
+	~vmt_multi_hook()
 	{
 		leak_table();
 	}
 
-  vmt_multi_hook(const vmt_multi_hook&) = delete;
-  vmt_multi_hook(vmt_multi_hook&&) = delete;
-
-  vmt_multi_hook& operator=(const vmt_multi_hook&) = delete;
-  vmt_multi_hook& operator=(vmt_multi_hook&&) = delete;
-
-	using vmt_base_hook::apply_hook;
-	using vmt_base_hook::get_original_function;
-	using vmt_base_hook::hook_function;
-	using vmt_base_hook::hook_instance;
-	using vmt_base_hook::unhook_instance;
-	using vmt_base_hook::initialize;
-	using vmt_base_hook::initialize_and_hook_instance;
+	using table_hook::apply_hook;
+	using table_hook::get_original_function;
+	using table_hook::hook_function;
+	using table_hook::hook_instance;
+	using table_hook::unhook_instance;
+	using table_hook::initialize;
+	using table_hook::initialize_and_hook_instance;
 };

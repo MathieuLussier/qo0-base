@@ -15,6 +15,7 @@ class CRageBot : public CSingleton<CRageBot>
 public:
 	// Get
 	void Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
+	void AutoRevolver(CUserCmd* pCmd, CBaseEntity* pLocal);
 
 	// Global Values
 	CBaseEntity* pBestEntity = nullptr;
@@ -50,6 +51,7 @@ private:
 	bool bAimbotAutoFire;
 	bool bAccuracyAutoStop;
 	bool bAimbotAutoPistol;
+	bool bBestPoint;
 	int iTargetSelection;
 	int iSmart;
 	int iAimScanType;

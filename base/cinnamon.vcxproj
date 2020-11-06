@@ -122,6 +122,7 @@
     <ClInclude Include="utilities\entitylistener.h" />
     <ClInclude Include="utilities\eventlistener.h" />
     <ClInclude Include="utilities\inputsystem.h" />
+    <ClInclude Include="utilities\kit_parser.hpp" />
     <ClInclude Include="utilities\logging.h" />
     <ClInclude Include="utilities\math.h" />
     <ClInclude Include="utilities\memory.h" />
@@ -168,6 +169,7 @@
     <ClCompile Include="utilities\entitylistener.cpp" />
     <ClCompile Include="utilities\eventlistener.cpp" />
     <ClCompile Include="utilities\inputsystem.cpp" />
+    <ClCompile Include="utilities\kit_parser.cpp" />
     <ClCompile Include="utilities\logging.cpp" />
     <ClCompile Include="utilities\math.cpp" />
     <ClCompile Include="utilities\memory.cpp" />

@@ -98,7 +98,7 @@ void CAntiAim::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	}
 
 	// send angles
-
+	angSentView.Normalize();
 	pCmd->angViewPoint = angSentView;
 	LastAngle = pCmd->angViewPoint;
 }
@@ -239,38 +239,6 @@ void CAntiAim::Desync(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta
 
 void CAntiAim::Jitter(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta, bool& bSendPacket)
 {
-	/*static int jitterangle = 0;
-
-	if (jitterangle <= 1)
-	{
-		angSentView.y += 90;
-	}
-	else if (jitterangle > 1 && jitterangle <= 3)
-	{
-		angSentView.y -= 90;
-	}
-
-	int re = rand() % 4 + 1;
-
-
-	if (jitterangle <= 1)
-	{
-		if (re == 4)
-			angSentView.y += 180;
-		jitterangle += 1;
-	}
-	else if (jitterangle > 1 && jitterangle <= 3)
-	{
-		if (re == 4)
-			angSentView.y -= 180;
-		jitterangle += 1;
-	}
-	else
-	{
-		jitterangle = 0;
-	}*/
-	static float flSide = 1.0f;
-
 	if (flServerTime >= flNextLowerBodyUpdate)
 	{
 		// check is we not choke now
@@ -280,30 +248,16 @@ void CAntiAim::Jitter(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta
 
 	}
 
+	float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
 	angSentView.y -= 180.f;
 
-	int random = rand() % 100;
-
-	if (random < 15)
-	{
-		float change = -70 + (rand() % (int)(140 + 1));
-		if (bSendPacket)
-			// real
-			angSentView.y += (flMaxDesyncDelta + change);
-		else
-			// fake
-			angSentView.y -= (flMaxDesyncDelta + change);
-	}
-	if (random == 69)
-	{
-		float change = -90 + (rand() % (int)(180 + 1));
-		if (bSendPacket)
-			// real
-			angSentView.y += (flMaxDesyncDelta + change);
-		else
-			// fake
-			angSentView.y -= (flMaxDesyncDelta + change);
-	}
+	if (bSendPacket)
+		// real
+		angSentView.y += (flMaxDesyncDelta * r);
+	else
+		// fake
+		angSentView.y -= (flMaxDesyncDelta * r);
 }
 
 void CAntiAim::BackJitter(CUserCmd* pCmd)
@@ -319,12 +273,12 @@ void CAntiAim::BackJitter(CUserCmd* pCmd)
 	//// Some gitter
 	if (random < 15)
 	{
-		float change = -70 + (rand() % (int)(140 + 1));
+		float change = (float)(-70 + (rand() % (int)(140 + 1)));
 		angSentView.y += change;
 	}
 	if (random == 69)
 	{
-		float change = -90 + (rand() % (int)(180 + 1));
+		float change = (float)(-90 + (rand() % (int)(180 + 1)));
 		angSentView.y += change;
 	}
 

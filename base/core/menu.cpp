@@ -148,13 +148,13 @@ void W::MainWindow(IDirect3DDevice9* pDevice)
 			ImGui::PopClipRect();
 
 			// add tabs
-			static std::array<CTab, 4U> const arrTabs =
+			static std::array<CTab, 5U> const arrTabs =
 			{
 				CTab{ "rage", &T::RageBot },
 				CTab{ "legit", &T::LegitBot },
 				CTab{ "visuals", &T::Visuals },
-				CTab{ "miscellaneous", &T::Miscellaneous }
-				//CTab{ "skinchanger", &T::SkinChanger }
+				CTab{ "miscellaneous", &T::Miscellaneous },
+				CTab{ "skinchanger", &T::SkinChanger }
 			};
 
 			T::Render<arrTabs.size()>(XorStr("main_tabs"), arrTabs, &iMainTab, style.Colors[ImGuiCol_TabActive]);
@@ -227,7 +227,8 @@ void T::RageBot()
 			if (C::Get<int>(Vars.iHitScanMode) == 0) {
 				ImGui::MultiCombo(XorStr("Hitboxes"), arrHitboxes, C::Get<std::vector<bool>>(Vars.vecRageTargetHitbox), IM_ARRAYSIZE(arrHitboxes));
 			}
-			ImGui::Checkbox(XorStr("aimstep"), &C::Get<bool>(Vars.bAimStep));
+			// ImGui::Checkbox(XorStr("aimstep"), &C::Get<bool>(Vars.bAimStep));
+			ImGui::Checkbox(XorStr("best point"), &C::Get<bool>(Vars.bBestPoint));
 			ImGui::Checkbox(XorStr("prefer body aim"), &C::Get<bool>(Vars.bPreferBodyAim));
 			ImGui::Checkbox(XorStr("auto wall"), &C::Get<bool>(Vars.bRageAutoWall));
 			ImGui::Checkbox(XorStr("no recoil"), &C::Get<bool>(Vars.bNoRecoil));
@@ -237,7 +238,7 @@ void T::RageBot()
 			ImGui::Checkbox(XorStr("position ajustment"), &C::Get<bool>(Vars.bPositionAdjustment));
 			ImGui::Combo(XorStr("target selection"), &C::Get<int>(Vars.iTargetSelection), XorStr("crosshair\0distance\0health\0\0"));
 
-			ImGui::SliderFloat(XorStr("point scale"), &C::Get<float>(Vars.flPointScale), 0.f, 10.f, "%.1f Deg");
+			// ImGui::SliderFloat(XorStr("point scale"), &C::Get<float>(Vars.flPointScale), 0.f, 10.f, "%.1f Deg");
 
 			// ImGui::SliderFloat(XorStr("head scale"), &C::Get<float>(Vars.flHeadPointScale), 0.f, 20.f, "%.1f radius");
 
@@ -883,12 +884,17 @@ void T::Miscellaneous()
 
 void T::SkinChanger()
 {
+	ImGuiStyle& style = ImGui::GetStyle();
+
 	ImGui::BeginChild(XorStr("skins"), ImVec2(), true);
 	{
+		ImGui::Checkbox(XorStr("enable"), &C::Get<bool>(Vars.bSkinChanger));
+
 		for (const auto& item : mapItemList) //first - itemdefindex, second - skin item struct
 		{
 
 		}
+
 
 		ImGui::EndChild();
 	}

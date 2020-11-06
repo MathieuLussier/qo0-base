@@ -110,6 +110,7 @@ struct Variables_t
 	C_ADD_VARIABLE(int, iHitScanMode, 0);
 	C_ADD_VARIABLE_VECTOR(bool, 5, vecRageTargetHitbox, false);
 	C_ADD_VARIABLE(bool, bAimStep, false);
+	C_ADD_VARIABLE(bool, bBestPoint, false);
 	C_ADD_VARIABLE(bool, bPreferBodyAim, false);
 	C_ADD_VARIABLE(bool, bNoRecoil, false);
 	C_ADD_VARIABLE(bool, bAutoScope, false);
@@ -120,7 +121,7 @@ struct Variables_t
 	C_ADD_VARIABLE(bool, bRageAutoWall, false);
 	C_ADD_VARIABLE(int, iTargetSelection, 0);
 	C_ADD_VARIABLE(int, iSmart, 1);
-	C_ADD_VARIABLE(float, flPointScale, 5.f);
+	// C_ADD_VARIABLE(float, flPointScale, 5.f);
 	//C_ADD_VARIABLE(float, flHeadPointScale, 0.f);
 	//C_ADD_VARIABLE(float, flChestPointScale, 0.f);
 
@@ -380,6 +381,8 @@ struct Variables_t
 	C_ADD_VARIABLE(bool, bMiscUnlockInventory, false);
 	C_ADD_VARIABLE(bool, bMiscAntiUntrusted, true);
 	#pragma endregion
+
+	C_ADD_VARIABLE(bool, bSkinChanger, false);
 
 	#pragma region variables_menu
 	C_ADD_VARIABLE(int, iMenuKey, VK_INSERT);

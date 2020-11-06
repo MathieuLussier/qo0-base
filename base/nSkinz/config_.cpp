@@ -22,26 +22,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#pragma once
-#include <vector>
-#include <string>
+#include "config_.hpp"
+#include "../Config.h"
 
-namespace game_data
+item_setting* get_by_definition_index(const int definition_index)
 {
-	struct paint_kit
+	auto it = std::find_if(std::begin(config->skinChanger), std::end(config->skinChanger), [definition_index](const item_setting& e)
 	{
-		int id;
-		std::string name;
+		return e.enabled && e.itemId == definition_index;
+	});
 
-		auto operator < (const paint_kit& other) const -> bool
-		{
-			return name < other.name;
-		}
-	};
-
-	extern std::vector<paint_kit> skin_kits;
-	extern std::vector<paint_kit> glove_kits;
-	extern std::vector<paint_kit> sticker_kits;
-
-	extern auto initialize_kits() -> void;
+	return it == std::end(config->skinChanger) ? nullptr : &*it;
 }

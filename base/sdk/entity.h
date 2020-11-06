@@ -758,6 +758,7 @@ public:
 	N_ADD_VARIABLE(int, GetAccountID, "CBaseAttributableItem->m_iAccountID");
 	N_ADD_VARIABLE(int, GetEntityQuality, "CBaseAttributableItem->m_iEntityQuality");
 	N_ADD_PVARIABLE(char, GetCustomName, "CBaseAttributableItem->m_szCustomName");
+	N_ADD_PVARIABLE(int, GetOwnerEntity, "CBaseAttributableItem->m_hOwnerEntity");
 	N_ADD_VARIABLE(int, GetOwnerXuidLow, "CBaseAttributableItem->m_OriginalOwnerXuidLow");
 	N_ADD_VARIABLE(int, GetOwnerXuidHigh, "CBaseAttributableItem->m_OriginalOwnerXuidHigh");
 	N_ADD_VARIABLE(int, GetFallbackPaintKit, "CBaseAttributableItem->m_nFallbackPaintKit");
