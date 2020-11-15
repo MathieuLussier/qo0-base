@@ -21,6 +21,83 @@
 
 #define TICK_INTERVAL			( I::Globals->flIntervalPerTick )
 
+float CRageBot::g_CapsuleVertices[][3] = {
+        { -0.01f, -0.01f, 1.00f },
+        { 0.51f, 0.00f, 0.86f },
+        { 0.44f, 0.25f, 0.86f },
+        { 0.25f, 0.44f, 0.86f },
+        { -0.01f, 0.51f, 0.86f },
+        { -0.26f, 0.44f, 0.86f },
+        { -0.45f, 0.25f, 0.86f },
+        { -0.51f, 0.00f, 0.86f },
+        { -0.45f, -0.26f, 0.86f },
+        { -0.26f, -0.45f, 0.86f },
+        { -0.01f, -0.51f, 0.86f },
+        { 0.25f, -0.45f, 0.86f },
+        { 0.44f, -0.26f, 0.86f },
+        { 0.86f, 0.00f, 0.51f },
+        { 0.75f, 0.43f, 0.51f },
+        { 0.43f, 0.75f, 0.51f },
+        { -0.01f, 0.86f, 0.51f },
+        { -0.44f, 0.75f, 0.51f },
+        { -0.76f, 0.43f, 0.51f },
+        { -0.87f, 0.00f, 0.51f },
+        { -0.76f, -0.44f, 0.51f },
+        { -0.44f, -0.76f, 0.51f },
+        { -0.01f, -0.87f, 0.51f },
+        { 0.43f, -0.76f, 0.51f },
+        { 0.75f, -0.44f, 0.51f },
+        { 1.00f, 0.00f, 0.01f },
+        { 0.86f, 0.50f, 0.01f },
+        { 0.49f, 0.86f, 0.01f },
+        { -0.01f, 1.00f, 0.01f },
+        { -0.51f, 0.86f, 0.01f },
+        { -0.87f, 0.50f, 0.01f },
+        { -1.00f, 0.00f, 0.01f },
+        { -0.87f, -0.50f, 0.01f },
+        { -0.51f, -0.87f, 0.01f },
+        { -0.01f, -1.00f, 0.01f },
+        { 0.49f, -0.87f, 0.01f },
+        { 0.86f, -0.51f, 0.01f },
+        { 1.00f, 0.00f, -0.02f },
+        { 0.86f, 0.50f, -0.02f },
+        { 0.49f, 0.86f, -0.02f },
+        { -0.01f, 1.00f, -0.02f },
+        { -0.51f, 0.86f, -0.02f },
+        { -0.87f, 0.50f, -0.02f },
+        { -1.00f, 0.00f, -0.02f },
+        { -0.87f, -0.50f, -0.02f },
+        { -0.51f, -0.87f, -0.02f },
+        { -0.01f, -1.00f, -0.02f },
+        { 0.49f, -0.87f, -0.02f },
+        { 0.86f, -0.51f, -0.02f },
+        { 0.86f, 0.00f, -0.51f },
+        { 0.75f, 0.43f, -0.51f },
+        { 0.43f, 0.75f, -0.51f },
+        { -0.01f, 0.86f, -0.51f },
+        { -0.44f, 0.75f, -0.51f },
+        { -0.76f, 0.43f, -0.51f },
+        { -0.87f, 0.00f, -0.51f },
+        { -0.76f, -0.44f, -0.51f },
+        { -0.44f, -0.76f, -0.51f },
+        { -0.01f, -0.87f, -0.51f },
+        { 0.43f, -0.76f, -0.51f },
+        { 0.75f, -0.44f, -0.51f },
+        { 0.51f, 0.00f, -0.87f },
+        { 0.44f, 0.25f, -0.87f },
+        { 0.25f, 0.44f, -0.87f },
+        { -0.01f, 0.51f, -0.87f },
+        { -0.26f, 0.44f, -0.87f },
+        { -0.45f, 0.25f, -0.87f },
+        { -0.51f, 0.00f, -0.87f },
+        { -0.45f, -0.26f, -0.87f },
+        { -0.26f, -0.45f, -0.87f },
+        { -0.01f, -0.51f, -0.87f },
+        { 0.25f, -0.45f, -0.87f },
+        { 0.44f, -0.26f, -0.87f },
+        { 0.00f, 0.00f, -1.00f },
+};
+
 void CRageBot::UpdateSettings(CUserCmd* pCmd, CBaseEntity* pLocal) {
     bAimbotEnable = true;
     bAimbotAutoFire = C::Get<bool>(Vars.bRageAutoFire);
@@ -46,7 +123,7 @@ void CRageBot::UpdateSettings(CUserCmd* pCmd, CBaseEntity* pLocal) {
     bHitboxArms = hitboxes[3];
     bHitboxlegs = hitboxes[4];
 
-    // flPointScale = C::Get<float>(Vars.flPointScale);
+    flPointScale = C::Get<float>(Vars.flPointScale);
     flHeadPointScale = 0.f;
     flChestPointScale = 0.f;
 
@@ -198,10 +275,11 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
         if (!CanOpenFire(pLocal))
             return;
 
+        float pointscale = flPointScale - 5.f;
 
         Vector Point;
-        Vector AimPoint = pTarget->GetHitboxPosition(HitBox).value();
-
+        Vector AimPoint = pTarget->GetHitboxPosition(HitBox).value() + Vector(0, 0, pointscale);
+        
 
         if (bBestPoint)
         {

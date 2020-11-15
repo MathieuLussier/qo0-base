@@ -57,6 +57,12 @@ namespace M
 	QAngle CalcAngle(const Vector& source, const Vector& destination, const QAngle& viewAngles);
 	/* transform vector by matrix and return it */
 	Vector	VectorTransform(const Vector& vecTransform, const matrix3x4_t& matrix);
+	Vector VectorRotate(const Vector& vecRotate, const matrix3x4_t& matrix);
+	void VectorRotate(const Vector& in1, const matrix3x4_t& in2, Vector& out);
+	void VectorRotate(const Vector& in1, const QAngle& in2, Vector& out);
+	void VectorRotate(const float* in1, const matrix3x4_t& in2, float* out);
+	void AngleMatrix2(const QAngle angles, matrix3x4_t& matrix);
+	void VectorMatrix(const Vector& vecMatrix, matrix3x4_t& matrix);
 	/* calculate next tick position */
 	Vector	ExtrapolateTick(const Vector& p0, const Vector& v0);
 	/* rotates given point and outputs to given outpoint by given angle */

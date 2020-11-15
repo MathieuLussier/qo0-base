@@ -76,4 +76,6 @@ private:
 	int HitBox;
 	Vector AimPoint;
 	CUserCmd* cmd;
+
+	static float g_CapsuleVertices[][3];
 };

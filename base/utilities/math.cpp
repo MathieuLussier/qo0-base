@@ -3,6 +3,7 @@
 // used: modules definitons, convar, globals interfaces
 #include "../core/interfaces.h"
 
+
 bool M::Setup()
 {
 	RandomSeed = reinterpret_cast<RandomSeedFn>(GetProcAddress(GetModuleHandle(VSTDLIB_DLL), XorStr("RandomSeed")));
@@ -154,6 +155,111 @@ Vector M::VectorTransform(const Vector& vecTransform, const matrix3x4_t& matrix)
 	return Vector(vecTransform.DotProduct(matrix[0]) + matrix[0][3],
 		vecTransform.DotProduct(matrix[1]) + matrix[1][3],
 		vecTransform.DotProduct(matrix[2]) + matrix[2][3]);
+}
+
+__forceinline float DotProduct1(const float* a, const float* b)
+{
+	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+__forceinline double degtorad(const double degree)
+{
+	double pi = 3.14159265359;
+	return (degree * (pi / 180));
+}
+
+Vector M::VectorRotate(const Vector& vecRotate, const matrix3x4_t& matrix)
+{
+	return Vector(
+		matrix[0][0] * vecRotate.x + matrix[1][0] * vecRotate.y + matrix[2][0] * vecRotate.z,
+		matrix[0][1] * vecRotate.x + matrix[1][1] * vecRotate.y + matrix[2][1] * vecRotate.z,
+		matrix[0][2] * vecRotate.x + matrix[1][2] * vecRotate.y + matrix[2][2] * vecRotate.z
+	);
+}
+
+void M::VectorRotate(const Vector& in1, const matrix3x4_t& in2, Vector& out)
+{
+	VectorRotate(&in1.x, in2, &out.x);
+}
+
+void M::VectorRotate(const Vector& in1, const QAngle& in2, Vector& out)
+{
+	matrix3x4_t matRotate;
+	AngleMatrix2(in2, matRotate);
+	VectorRotate(in1, matRotate, out);
+}
+
+void M::VectorRotate(const float* in1, const matrix3x4_t& in2, float* out)
+{
+	out[0] = DotProduct1(in1, in2[0]);
+	out[1] = DotProduct1(in1, in2[1]);
+	out[2] = DotProduct1(in1, in2[2]);
+}
+
+void M::AngleMatrix2(const QAngle angles, matrix3x4_t& matrix)
+{
+	float sr, sp, sy, cr, cp, cy;
+
+	sy = sin(degtorad(angles.y));
+	cy = cos(degtorad(angles.y));
+
+	sp = sin(degtorad(angles.x));
+	cp = cos(degtorad(angles.x));
+
+	sr = sin(degtorad(angles.z));
+	cr = cos(degtorad(angles.z));
+
+	//matrix = (YAW * PITCH) * ROLL
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
+
+	float crcy = cr * cy;
+	float crsy = cr * sy;
+	float srcy = sr * cy;
+	float srsy = sr * sy;
+
+	matrix[0][1] = sp * srcy - crsy;
+	matrix[1][1] = sp * srsy + crcy;
+	matrix[2][1] = sr * cp;
+
+	matrix[0][2] = (sp * crcy + srsy);
+	matrix[1][2] = (sp * crsy - srcy);
+	matrix[2][2] = cr * cp;
+
+	matrix[0][3] = 0.0f;
+	matrix[1][3] = 0.0f;
+	matrix[2][3] = 0.0f;
+}
+
+void M::VectorMatrix(const Vector& vecMatrix, matrix3x4_t& matrix)
+{
+	float sp, sy, sr, cp, cy, cr;
+
+	DirectX::XMScalarSinCos(&sp, &cp, M_DEG2RAD(vecMatrix.x));
+	DirectX::XMScalarSinCos(&sy, &cy, M_DEG2RAD(vecMatrix.y));
+	DirectX::XMScalarSinCos(&sr, &cr, M_DEG2RAD(vecMatrix.z));
+
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
+
+	const float crcy = cr * cy;
+	const float crsy = cr * sy;
+	const float srcy = sr * cy;
+	const float srsy = sr * sy;
+
+	matrix[0][1] = sp * srcy - crsy;
+	matrix[1][1] = sp * srsy + crcy;
+	matrix[2][1] = sr * cp;
+
+	matrix[0][2] = (sp * crcy + srsy);
+	matrix[1][2] = (sp * crsy - srcy);
+	matrix[2][2] = cr * cp;
+
+	matrix[0][3] = 0.f;
+	matrix[1][3] = 0.f;
+	matrix[2][3] = 0.f;
 }
 
 Vector M::ExtrapolateTick(const Vector& p0, const Vector& v0)

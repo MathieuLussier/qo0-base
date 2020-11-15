@@ -121,7 +121,7 @@ struct Variables_t
 	C_ADD_VARIABLE(bool, bRageAutoWall, false);
 	C_ADD_VARIABLE(int, iTargetSelection, 0);
 	C_ADD_VARIABLE(int, iSmart, 1);
-	// C_ADD_VARIABLE(float, flPointScale, 5.f);
+	C_ADD_VARIABLE(float, flPointScale, 5.f);
 	//C_ADD_VARIABLE(float, flHeadPointScale, 0.f);
 	//C_ADD_VARIABLE(float, flChestPointScale, 0.f);
 

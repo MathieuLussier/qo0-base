@@ -238,7 +238,7 @@ void T::RageBot()
 			ImGui::Checkbox(XorStr("position ajustment"), &C::Get<bool>(Vars.bPositionAdjustment));
 			ImGui::Combo(XorStr("target selection"), &C::Get<int>(Vars.iTargetSelection), XorStr("crosshair\0distance\0health\0\0"));
 
-			// ImGui::SliderFloat(XorStr("point scale"), &C::Get<float>(Vars.flPointScale), 0.f, 10.f, "%.1f Deg");
+			ImGui::SliderFloat(XorStr("point scale"), &C::Get<float>(Vars.flPointScale), 0.f, 10.f, "%.1f Deg");
 
 			// ImGui::SliderFloat(XorStr("head scale"), &C::Get<float>(Vars.flHeadPointScale), 0.f, 20.f, "%.1f radius");
 
