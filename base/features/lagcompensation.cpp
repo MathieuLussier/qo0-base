@@ -53,3 +53,38 @@ void CLagCompensation::AddLatencyToNetChannel(INetChannel* pNetChannel, float fl
 		}
 	}
 }
+
+//void CLagCompensation::AnimFix(CBaseEntity* entity)
+//{
+//	if (!should_lag_compensate(entity) || !entity->is_self_animating())
+//		return;
+//
+//	auto player_index = entity->GetIndex() - 1;
+//	auto player_record = &G::player_lag_records[player_index];
+//	
+//	if (player_record->records->size() < 2)
+//		return;
+//
+//	entity->IsClientSideAnimation() = true;
+//
+//	auto old_curtime = G::interfaces.globaldata->curtime;
+//	auto old_frametime = G::interfaces.globaldata->frametime;
+//	auto old_ragpos = entity->get_ragdoll_pos();
+//
+//	G::interfaces.globaldata->curtime = entity->get_simulation_time();
+//	G::interfaces.globaldata->frametime = G::interfaces.globaldata->interval_per_tick;
+//
+//	auto player_animation_state = reinterpret_cast<DWORD*>(entity + 0x3894);
+//	auto player_model_time = reinterpret_cast<int*>(player_animation_state + 112);
+//	if (player_animation_state != nullptr && player_model_time != nullptr)
+//		if (*player_model_time == G::interfaces.globaldata->framecount)
+//			*player_model_time = G::interfaces.globaldata->framecount - 1;
+//
+//	entity->get_ragdoll_pos() = old_ragpos;
+//	entity->update_clientside_animations();
+//
+//	G::interfaces.globaldata->curtime = old_curtime;
+//	G::interfaces.globaldata->frametime = old_frametime;
+//
+//	entity->client_side_animation() = false;
+//}

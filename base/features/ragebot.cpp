@@ -315,6 +315,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
         else
         {
             if ((ihitchance <= CRageBot::HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal)))
+            //if ((ihitchance <= CRageBot::hitchance(pLocal, pWeapon)))
             {
                 if (AimAtPoint(pLocal, Point, pCmd, bSendPacket))
                 {
@@ -355,7 +356,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 
 int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* pWeapon, CBaseEntity* pLocal)
 {
-    int hitseed = 256;
+    int hitseed = 100;
 
     int iHit = 0;
     int iHitsNeed = (int)((float)hitseed * ((float)ihitchance / 100.f));
@@ -406,9 +407,9 @@ int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* p
         if (dmg >= imin_damage)
             iHit++;
 
-        iHitchance = (int)(((float)iHit / 256.f) * 100.f);
+        iHitchance = (int)(((float)iHit / 100.f) * 100.f);
 
-        if ((int)(((float)iHit / 256.f) * 100.f) >= ihitchance) {
+        if ((int)(((float)iHit / 100.f) * 100.f) >= ihitchance) {
             break;
         }
 
@@ -416,6 +417,23 @@ int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* p
             break;
     }
     return iHitchance;
+}
+
+int CRageBot::hitchance(CBaseEntity* pLocal, CBaseCombatWeapon* pWeapon)
+{
+    //	CBaseCombatWeapon* pWeapon = (CBaseCombatWeapon*)Interfaces::EntList->GetClientEntityFromHandle(pLocal->GetActiveWeaponHandle());
+    int hitchance = 101;
+    if (!pWeapon) return 0;
+    if (ihitchance > 1)
+    {//Inaccuracy method
+        pWeapon->UpdateAccuracyPenalty();
+        float inaccuracy = pWeapon->GetInaccuracy();
+        if (inaccuracy == 0) inaccuracy = 0.0000001;
+        inaccuracy = 1 / inaccuracy;
+        hitchance = inaccuracy;
+
+    }
+    return hitchance;
 }
 
 bool CRageBot::IsAbleToShoot(CBaseEntity* pLocal)

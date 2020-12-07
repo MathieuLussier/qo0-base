@@ -24,6 +24,7 @@ private:
 	void Rage(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
 	void DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket);
 	int HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* pWeapon, CBaseEntity* pLocal);
+	int hitchance(CBaseEntity* pLocal, CBaseCombatWeapon* pWeapon);
 	bool IsAbleToShoot(CBaseEntity* pLocal);
 	bool CanOpenFire(CBaseEntity* pLocal);
 	Vector BestPoint(CBaseEntity* targetPlayer, Vector & final, CBaseEntity* pLocal);

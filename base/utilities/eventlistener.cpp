@@ -6,6 +6,8 @@
 /* features event */
 #include "../features/resolver.h"
 #include "../features/visuals.h"
+#include "../features/misc.h"
+#include "../features/skinchanger.h"
 
 void CEventListener::Setup(const std::deque<const char*>& arrEvents)
 {
@@ -36,5 +38,6 @@ void CEventListener::FireGameEvent(IGameEvent* pEvent)
 
 	#pragma region eventlistener_handlers
 	CVisuals::Get().Event(pEvent, uNameHash);
+	CSkinChanger::Get().SkinChangerEvent(pEvent, uNameHash);
 	#pragma endregion
 }

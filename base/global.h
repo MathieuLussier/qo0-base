@@ -31,4 +31,6 @@ namespace G
 	inline QAngle			angStep = { };
 	// camera origin
 	inline Vector			vecCamera = { };
+
+
 }

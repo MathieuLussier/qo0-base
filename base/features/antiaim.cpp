@@ -153,6 +153,7 @@ void CAntiAim::UpdateServerAnimations(CUserCmd* pCmd, CBaseEntity* pLocal)
 		const std::array<float, MAXSTUDIOPOSEPARAM> arrPosesOld = pLocal->GetPoseParameter();
 
 		pServerAnimState->Update(pCmd->angViewPoint);
+		// pLocal->GetAnimationState()->Update(pCmd->angViewPoint);
 
 		// restore values
 		std::copy(arrNetworkedLayers.begin(), arrNetworkedLayers.end(), pLocal->GetAnimationOverlays());
@@ -262,16 +263,15 @@ void CAntiAim::Jitter(CUserCmd* pCmd, float flServerTime, float flMaxDesyncDelta
 
 void CAntiAim::BackJitter(CUserCmd* pCmd)
 {
-	QAngle currentViewAngles = pCmd->angViewPoint;
-	int random = rand() % 100;
-
+	// QAngle currentViewAngles = pCmd->angViewPoint;
+	// int random = rand() % 100;
+	angSentView.y -= 180.f;
 	//// Small chance of starting fowards
-	if (random < 98)
-		// Look backwards
-		angSentView.y -= 180;
+	/*if (random < 98)
+		angSentView.y -= 180;*/
 
 	//// Some gitter
-	if (random < 15)
+	/*if (random < 15)
 	{
 		float change = (float)(-70 + (rand() % (int)(140 + 1)));
 		angSentView.y += change;
@@ -280,9 +280,9 @@ void CAntiAim::BackJitter(CUserCmd* pCmd)
 	{
 		float change = (float)(-90 + (rand() % (int)(180 + 1)));
 		angSentView.y += change;
-	}
+	}*/
 
-	//CorrectMovement(currentViewAngles.y, pCmd, pCmd->flForwardMove, pCmd->flSideMove);
+	// CorrectMovement(currentViewAngles.y, pCmd, pCmd->flForwardMove, pCmd->flSideMove);
 }
 
 void CAntiAim::CorrectMovement(float OldAngleY, CUserCmd* pCmd, float fOldForward, float fOldSidemove)

@@ -25,6 +25,7 @@ struct EconomyItemCfg {
 	int nFallbackStatTrak = -1;
 	int iEntityQuality = 4;
 	char* szCustomName = nullptr;
+	char* model = nullptr;
 	float flFallbackWear = 0.1f;
 };
 
@@ -112,6 +113,8 @@ public:
 	void Event(IGameEvent* pEvent, const FNV1A_t uNameHash);
 	/* dump stikers and paintkits */
 	void Dump();
+
+	void SkinChangerEvent(IGameEvent* pEvent, const FNV1A_t uNameHash);
 private:
 	/* ur values and main functionality */
 	std::unordered_map<int, EconomyItemCfg> g_SkinChangerCfg;
