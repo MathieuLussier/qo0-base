@@ -527,7 +527,7 @@ float CRageBot::FovToPlayer(Vector ViewOffSet, QAngle View, CBaseEntity* pEntity
     //Delta = AimPos - Origin;
 
     // Normalize our delta vector
-    Delta.Normalize();
+    Delta.NormalizeInPlace();
 
     // Get dot product between delta position and directional forward vectors
     FLOAT DotProduct = Forward.DotProduct(Delta);
