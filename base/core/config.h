@@ -23,7 +23,9 @@
 
 struct VariableObject_t
 {
-	VariableObject_t(const FNV1A_t uNameHash, const FNV1A_t uTypeHash, std::any&& pDefault)
+	VariableObject_t() = default;
+
+	explicit VariableObject_t(const FNV1A_t uNameHash, const FNV1A_t uTypeHash, std::any&& pDefault)
 		: uNameHash(uNameHash), uTypeHash(uTypeHash), pValue(std::move(pDefault)) { }
 
 	~VariableObject_t() = default;
@@ -42,9 +44,9 @@ struct VariableObject_t
 		pValue.emplace<T>(value);
 	}
 
-	FNV1A_t uNameHash = 0x0;
-	FNV1A_t uTypeHash = 0x0;
-	std::any pValue = { };
+	FNV1A_t		uNameHash;
+	FNV1A_t		uTypeHash;
+	std::any	pValue;
 };
 
 /*

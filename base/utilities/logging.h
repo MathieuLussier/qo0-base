@@ -45,7 +45,7 @@ namespace L
 	/* console write stream */
 	inline FILE*			pStream;
 	/* current color of console text */
-	inline std::uint16_t	wConsoleColor = FOREGROUND_WHITE;
+	inline std::uint8_t		wConsoleColor = FOREGROUND_WHITE;
 	/* current file used for file-logging */
 	inline std::ofstream	ofsFile;
 
@@ -58,7 +58,7 @@ namespace L
 	void Print(std::string_view szText);
 
 	/* set given color to console */
-	inline void PushConsoleColor(const std::uint16_t wColor)
+	inline void PushConsoleColor(const std::uint8_t wColor)
 	{
 		wConsoleColor = wColor;
 	}

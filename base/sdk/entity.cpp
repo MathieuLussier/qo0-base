@@ -16,7 +16,6 @@ CBaseEntity* CBaseEntity::GetLocalPlayer()
 int CBaseEntity::GetSequenceActivity(int iSequence)
 {
 	studiohdr_t* pStudioHdr = I::ModelInfo->GetStudioModel(this->GetModel());
-
 	if (pStudioHdr == nullptr)
 		return -1;
 
@@ -45,7 +44,7 @@ std::optional<Vector> CBaseEntity::GetBonePosition(int iBone)
 
 	std::array<matrix3x4_t, MAXSTUDIOBONES> arrBonesToWorld = { };
 
-	if (this->SetupBones(arrBonesToWorld.data(), arrBonesToWorld.size(), BONE_USED_BY_ANYTHING, 0.f))
+	if (this->SetupBones(arrBonesToWorld.data(), MAXSTUDIOBONES, BONE_USED_BY_ANYTHING, 0.f))
 		return arrBonesToWorld.at(iBone).at(3);
 
 	return std::nullopt;
@@ -80,7 +79,7 @@ std::optional<Vector> CBaseEntity::GetHitboxPosition(int iHitbox)
 		{
 			if (const auto pHitbox = pStudioHdr->GetHitbox(iHitbox, 0); pHitbox != nullptr)
 			{
-				if (this->SetupBones(arrBonesToWorld.data(), arrBonesToWorld.size(), BONE_USED_BY_HITBOX, 0.f))
+				if (this->SetupBones(arrBonesToWorld.data(), MAXSTUDIOBONES, BONE_USED_BY_HITBOX, 0.f))
 				{
 					// get mins/maxs by bone
 					const Vector vecMin = M::VectorTransform(pHitbox->vecBBMin, arrBonesToWorld.at(pHitbox->iBone));
@@ -108,7 +107,7 @@ std::optional<Vector> CBaseEntity::GetHitGroupPosition(int iHitGroup)
 		{
 			if (const auto pHitboxSet = pStudioHdr->GetHitboxSet(this->GetHitboxSet()); pHitboxSet != nullptr)
 			{
-				if (this->SetupBones(arrBonesToWorld.data(), arrBonesToWorld.size(), BONE_USED_BY_HITBOX, 0.f))
+				if (this->SetupBones(arrBonesToWorld.data(), MAXSTUDIOBONES, BONE_USED_BY_HITBOX, 0.f))
 				{
 					mstudiobbox_t* pHitbox = nullptr;
 					for (int i = 0; i < pHitboxSet->nHitboxes; i++)
@@ -152,22 +151,19 @@ void CBaseEntity::ModifyEyePosition(CCSGOPlayerAnimState* pAnimState, Vector* ve
 	if (!pAnimState->bHitGroundAnimation && pAnimState->flDuckAmount == 0.f && pGroundEntity != nullptr)
 		return;
 
-	if (const auto headPosition = pBaseEntity->GetBonePosition(pBaseEntity->GetBoneByHash(FNV1A::HashConst("head_0"))); headPosition.has_value())
+	Vector vecBone = pBaseEntity->GetBonePosition(pBaseEntity->GetBoneByHash(FNV1A::HashConst("head_0"))).value();
+	vecBone.z += 1.7f;
+
+	if (vecPosition->z > vecBone.z)
 	{
-		Vector vecBone = headPosition.value();
-		vecBone.z += 1.7f;
+		float flFactor = 0.f;
+		const float flDelta = vecPosition->z - vecBone.z;
+		const float flOffset = (flDelta - 4.0f) / 6.0f;
 
-		if (vecPosition->z > vecBone.z)
-		{
-			float flFactor = 0.f;
-			const float flDelta = vecPosition->z - vecBone.z;
-			const float flOffset = (flDelta - 4.0f) / 6.0f;
+		if (flOffset >= 0.f)
+			flFactor = std::min(flOffset, 1.0f);
 
-			if (flOffset >= 0.f)
-				flFactor = std::min(flOffset, 1.0f);
-
-			vecPosition->z += ((vecBone.z - vecPosition->z) * (((flFactor * flFactor) * 3.0f) - (((flFactor * flFactor) * 2.0f) * flFactor)));
-		}
+		vecPosition->z += ((vecBone.z - vecPosition->z) * (((flFactor * flFactor) * 3.0f) - (((flFactor * flFactor) * 2.0f) * flFactor)));
 	}
 }
 

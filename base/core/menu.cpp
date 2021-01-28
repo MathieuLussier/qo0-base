@@ -119,6 +119,7 @@ void W::MainWindow(IDirect3DDevice9* pDevice)
 	#pragma endregion
 
 	#pragma region main_window
+	ImGui::PushFont(F::Whitney);
 	io.MouseDrawCursor = bMainOpened;
 
 	if (bMainOpened)
@@ -133,19 +134,12 @@ void W::MainWindow(IDirect3DDevice9* pDevice)
 		ImGui::SetNextWindowSize(ImVec2(500, 327), ImGuiCond_Always);
 		ImGui::Begin(XorStr("KbK Cheats"), &bMainOpened, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse);
 		{
-			const ImVec2 vecPosition = ImGui::GetCursorScreenPos();
-			const float flWindowWidth = ImGui::GetWindowWidth();
-			ImDrawList* pWindowDrawList = ImGui::GetWindowDrawList();
-
-			// push clip so separator will be drawn at maximal window bounds
-			ImGui::PushClipRect(ImVec2(vecPosition.x - 8.f, vecPosition.y - 8.f), ImVec2(vecPosition.x + flWindowWidth - 8.f, vecPosition.y - 6.f), false);
+			ImVec2 vecPos = ImGui::GetCursorScreenPos();
+			float flWindowWidth = ImGui::GetWindowWidth();
 
 			// header separate line
-			pWindowDrawList->AddRectFilledMultiColor(ImVec2(vecPosition.x - 8.f, vecPosition.y - 6.f), ImVec2(vecPosition.x + flWindowWidth - flWindowWidth / 3.f - 8.f, vecPosition.y - 8.f), IM_COL32(75, 50, 105, 255), IM_COL32(110, 100, 130, 255), IM_COL32(110, 100, 130, 255), IM_COL32(75, 50, 105, 255));
-			pWindowDrawList->AddRectFilledMultiColor(ImVec2(vecPosition.x + flWindowWidth - flWindowWidth / 3.f - 8.f, vecPosition.y - 6.f), ImVec2(vecPosition.x + flWindowWidth - 8.f, vecPosition.y - 8.f), IM_COL32(110, 100, 130, 255), IM_COL32(75, 50, 105, 255), IM_COL32(75, 50, 105, 255), IM_COL32(110, 100, 130, 255));
-
-			// restore cliprect
-			ImGui::PopClipRect();
+			pForegroundDrawList->AddRectFilledMultiColor(ImVec2(vecPos.x - 8.f, vecPos.y - 6.f), ImVec2(vecPos.x + flWindowWidth - flWindowWidth / 3.f - 8.f, vecPos.y - 8.f), IM_COL32(75, 50, 105, 255), IM_COL32(110, 100, 130, 255), IM_COL32(110, 100, 130, 255), IM_COL32(75, 50, 105, 255));
+			pForegroundDrawList->AddRectFilledMultiColor(ImVec2(vecPos.x + flWindowWidth - flWindowWidth / 3.f - 8.f, vecPos.y - 6.f), ImVec2(vecPos.x + flWindowWidth - 8.f, vecPos.y - 8.f), IM_COL32(110, 100, 130, 255), IM_COL32(75, 50, 105, 255), IM_COL32(75, 50, 105, 255), IM_COL32(110, 100, 130, 255));
 
 			// add tabs
 			static std::array<CTab, 5U> const arrTabs =
@@ -162,6 +156,8 @@ void W::MainWindow(IDirect3DDevice9* pDevice)
 			ImGui::End();
 		}
 	}
+
+	ImGui::PopFont();
 	#pragma endregion
 }
 #pragma endregion
@@ -583,7 +579,7 @@ void T::Visuals()
 						ImGui::Checkbox(XorStr("money##player"), &C::Get<bool>(Vars.bEspMainPlayerMoney));
 						ImGui::Checkbox(XorStr("name##player"), &C::Get<bool>(Vars.bEspMainPlayerName));
 						ImGui::Checkbox(XorStr("flash##player"), &C::Get<bool>(Vars.bEspMainPlayerFlash));
-						ImGui::MultiCombo(XorStr("flags##player"), C::Get<std::vector<bool>>(Vars.vecEspMainPlayerFlags), arrVisualsFlags.data(), arrVisualsFlags.size());
+						ImGui::MultiCombo(XorStr("flags##player"), arrVisualsFlags, C::Get<std::vector<bool>>(Vars.vecEspMainPlayerFlags), IM_ARRAYSIZE(arrVisualsFlags));
 						ImGui::Checkbox(XorStr("weapons##player"), &C::Get<bool>(Vars.bEspMainPlayerWeapons));
 						ImGui::Checkbox(XorStr("ammo##player"), &C::Get<bool>(Vars.bEspMainPlayerAmmo));
 						ImGui::Checkbox(XorStr("distance##player"), &C::Get<bool>(Vars.bEspMainPlayerDistance));
@@ -661,7 +657,7 @@ void T::Visuals()
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
 			ImGui::Checkbox(XorStr("night mode"), &C::Get<bool>(Vars.bWorldNightMode));
 			ImGui::SliderInt(XorStr("max flash effect"), &C::Get<int>(Vars.iWorldMaxFlash), 0, 100, "%d%%");
-			ImGui::MultiCombo(XorStr("removals"), C::Get<std::vector<bool>>(Vars.vecWorldRemovals), arrVisualsRemovals.data(), arrVisualsRemovals.size());
+			ImGui::MultiCombo(XorStr("removals"), arrVisualsRemovals, C::Get<std::vector<bool>>(Vars.vecWorldRemovals), IM_ARRAYSIZE(arrVisualsRemovals));
 			ImGui::Separator();
 
 			ImGui::HotKey(XorStr("thirdperson"), &C::Get<int>(Vars.iWorldThirdPersonKey));
@@ -694,7 +690,7 @@ void T::Visuals()
 			ImGui::Checkbox(XorStr("sound"), &C::Get<bool>(Vars.bScreenHitMarkerSound));
 			ImGui::SliderFloat(XorStr("time"), &C::Get<float>(Vars.flScreenHitMarkerTime), 0.5f, 5.f, "%.1fsec");
 			ImGui::SliderInt(XorStr("gap"), &C::Get<int>(Vars.iScreenHitMarkerGap), 1, 20, "%d pixels");
-			ImGui::SliderInt(XorStr("length"), &C::Get<int>(Vars.iScreenHitMarkerLenght), 1, 20, "%d pixels");
+			ImGui::SliderInt(XorStr("lenght"), &C::Get<int>(Vars.iScreenHitMarkerLenght), 1, 20, "%d pixels");
 			ImGui::PopStyleVar();
 
 			ImGui::EndChild();

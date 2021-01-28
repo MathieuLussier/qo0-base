@@ -307,7 +307,7 @@
       <CompileAs>Default</CompileAs>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <BufferSecurityCheck>
       </BufferSecurityCheck>

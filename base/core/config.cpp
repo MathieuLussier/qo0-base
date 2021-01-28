@@ -188,12 +188,7 @@ bool C::Load(std::string_view szFileName)
 	try
 	{
 		// parse saved variables
-		config = nlohmann::json::parse(ifsInputFile, nullptr, false);
-
-		// check is json parse failed
-		if (config.is_discarded())
-			return false;
-
+		ifsInputFile >> config;
 		ifsInputFile.close();
 	}
 	catch (std::ifstream::failure& ex)

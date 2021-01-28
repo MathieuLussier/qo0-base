@@ -7,8 +7,6 @@
 #include <mutex>
 // used: std::shared_mutex
 #include <shared_mutex>
-// used: std::any
-#include <any>
 
 // used: winapi, directx, imgui, fmt includes
 #include "../common.h"
@@ -17,7 +15,7 @@
 // used: vector
 #include "../sdk/datatypes/vector.h"
 
-// types of thread-safe render objects
+#pragma region draw_enumerations
 enum class EDrawType : int
 {
 	NONE = 0,
@@ -43,10 +41,10 @@ struct DrawObject_t
 #pragma region draw_objects_enumerations
 enum ERectRenderFlags : unsigned int
 {
-	DRAW_RECT_NONE = 0,
-	DRAW_RECT_OUTLINE = (1 << 0),
-	DRAW_RECT_BORDER = (1 << 1),
-	DRAW_RECT_FILLED = (1 << 2)
+	IMGUI_RECT_NONE =		0,
+	IMGUI_RECT_OUTLINE =	(1 << 0),
+	IMGUI_RECT_BORDER =		(1 << 1),
+	IMGUI_RECT_FILLED =		(1 << 2)
 };
 
 enum ECircleRenderFlags : unsigned int
@@ -89,17 +87,13 @@ struct LineObject_t
 
 struct RectObject_t
 {
-	ImVec2 vecMin = { };
-	ImVec2 vecMax = { };
-	ImU32 colRect = 0x0;
-	unsigned int uFlags = 0x0;
-	ImU32 colOutline = 0x0;
-	float flRounding = 0.f;
-	ImDrawCornerFlags roundingCorners = ImDrawCornerFlags_None;
-	float flThickness = 0.f;
+	IMGUI_CIRCLE_NONE =		0,
+	IMGUI_CIRCLE_OUTLINE =	(1 << 0),
+	IMGUI_CIRCLE_FILLED =	(1 << 1)
 };
 
-struct RectMultiColorObject_t
+// triangle rendering flags
+enum ETriangleRenderFlags : int
 {
 	ImVec2 vecMin = { };
 	ImVec2 vecMax = { };
@@ -108,17 +102,11 @@ struct RectMultiColorObject_t
 	ImU32 colBottomRight = 0x0;
 	ImU32 colBottomLeft = 0x0;
 };
+#pragma endregion
 
-struct CircleObject_t
+struct DrawObject_t
 {
-	ImVec2 vecCenter = { };
-	float flRadius = 0.f;
-	ImU32 colCircle = 0x0;
-	int nSegments = 0;
-	unsigned int uFlags = 0x0;
-	ImU32 colOutline = 0x0;
-	float flThickness = 0.f;
-};
+	EDrawType nType = EDrawType::NONE;
 
 struct TriangleObject_t
 {
@@ -147,21 +135,15 @@ struct TextObject_t
 	float flFontSize = 0.f;
 	ImVec2 vecPosition = { };
 	std::string szText = { };
-	ImU32 colText = 0x0;
-	unsigned int uFlags = 0x0;
-	ImU32 colOutline = 0x0;
-};
+	int iFlags = 0;
 
-struct ImageObject_t
-{
-	ImTextureID pTexture = nullptr;
-	ImVec2 vecMin = { };
-	ImVec2 vecMax = { };
-	ImU32 colImage = 0x0;
-	float flRounding = 0.f;
+	/* primitive factors */
+	float flRadius = 0.0f;
+	int nSegments = 0;
+	float flRounding = 0.0f;
 	ImDrawCornerFlags roundingCorners = ImDrawCornerFlags_None;
+	float flThickness = 0.0f;
 };
-#pragma endregion
 
 /*
  * FONTS
@@ -189,16 +171,16 @@ namespace ImGui
 	// Main
 	void HelpMarker(const char* szDescription);
 	bool ListBox(const char* szLabel, int* iCurrentItem, std::function<const char* (int)> pLambda, int nItemsCount, int iHeightInItems);
-	bool HotKey(const char* szLabel, int* pValue);
-	bool MultiCombo(const char* szLabel, std::vector<bool>& vecValues, const std::string_view* arrItems, int nItemsCount);
+	bool HotKey(const char* szLabel, int* v);
+	bool MultiCombo(const char* szLabel, const char** szDisplayName, std::vector<bool>& v, int nHeightInItems);
 
 	// Wrappers
-	bool Combo(const char* szLabel, std::vector<int>& vecValues, int nIndex, const char* szItemsSeparatedByZeros, int nHeightInItems = -1);
-	bool Checkbox(const char* szLabel, std::vector<bool>& vecValues, int nIndex);
-	bool SliderFloat(const char* szLabel, std::vector<float>& vecValues, int nIndex, float flMin, float flMax, const char* szFormat = "%.3f", float flPower = 1.0f);
-	bool SliderInt(const char* szLabel, std::vector<int>& vecValues, int nIndex, int iMin, int iMax, const char* szFormat = "%d");
-	bool ColorEdit3(const char* szLabel, Color* pColor, ImGuiColorEditFlags flags);
-	bool ColorEdit4(const char* szLabel, Color* pColor, ImGuiColorEditFlags flags);
+	bool Combo(const char* szLabel, std::vector<int>& v, int nIndex, const char* szItemsSeparatedByZeros, int nHeightInItems = -1);
+	bool Checkbox(const char* szLabel, std::vector<bool>& v, int nIndex);
+	bool SliderFloat(const char* szLabel, std::vector<float>& v, int nIndex, float flMin, float flMax, const char* szFormat = "%.3f", float flPower = 1.0f);
+	bool SliderInt(const char* szLabel, std::vector<int>& v, int nIndex, int iMin, int iMax, const char* szFormat = "%d");
+	bool ColorEdit3(const char* szLabel, Color* v, ImGuiColorEditFlags flags);
+	bool ColorEdit4(const char* szLabel, Color* v, ImGuiColorEditFlags flags);
 }
 
 /*

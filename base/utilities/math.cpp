@@ -86,7 +86,7 @@ void M::AngleVectors(const QAngle& angView, Vector* pForward, Vector* pRight, Ve
 	}
 }
 
-void M::AngleMatrix(const QAngle& angView, matrix3x4_t& matOutput, const Vector& vecOrigin)
+void M::AngleMatrix(const QAngle& angView, matrix3x4_t& matrix)
 {
 	float sp, sy, sr, cp, cy, cr;
 
@@ -94,16 +94,26 @@ void M::AngleMatrix(const QAngle& angView, matrix3x4_t& matOutput, const Vector&
 	DirectX::XMScalarSinCos(&sy, &cy, M_DEG2RAD(angView.y));
 	DirectX::XMScalarSinCos(&sr, &cr, M_DEG2RAD(angView.z));
 
-	matOutput.SetForward(Vector(cp * cy, cp * sy, -sp));
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
 
 	const float crcy = cr * cy;
 	const float crsy = cr * sy;
 	const float srcy = sr * cy;
 	const float srsy = sr * sy;
 
-	matOutput.SetLeft(Vector(sp * srcy - crsy, sp * srsy + crcy, sr * cp));
-	matOutput.SetUp(Vector(sp * crcy + srsy, sp * crsy - srcy, cr * cp));
-	matOutput.SetOrigin(vecOrigin);
+	matrix[0][1] = sp * srcy - crsy;
+	matrix[1][1] = sp * srsy + crcy;
+	matrix[2][1] = sr * cp;
+
+	matrix[0][2] = (sp * crcy + srsy);
+	matrix[1][2] = (sp * crsy - srcy);
+	matrix[2][2] = cr * cp;
+
+	matrix[0][3] = 0.f;
+	matrix[1][3] = 0.f;
+	matrix[2][3] = 0.f;
 }
 
 Vector2D M::AnglePixels(const float flSensitivity, const float flPitch, const float flYaw, const QAngle& angBegin, const QAngle& angEnd)
@@ -268,20 +278,8 @@ Vector M::ExtrapolateTick(const Vector& p0, const Vector& v0)
 	return p0 + (v0 * I::Globals->flIntervalPerTick);
 }
 
-void M::RotatePoint(const ImVec2& vecIn, const float flAngle, ImVec2* pOutPoint)
-{
-	if (&vecIn == pOutPoint)
-	{
-		const ImVec2 vecPoint = vecIn;
-		RotatePoint(vecPoint, flAngle, pOutPoint);
-		return;
-	}
-
-	const float flSin = std::sinf(M_DEG2RAD(flAngle));
-	const float flCos = std::cosf(M_DEG2RAD(flAngle));
-
-	pOutPoint->x = vecIn.x * flCos - vecIn.y * flSin;
-	pOutPoint->y = vecIn.x * flSin + vecIn.y * flCos;
+float M::Deg2rad(float angle) {
+	return (float)((M_PI / 180) * angle);
 }
 
 void M::RotateCenter(const ImVec2& vecCenter, const float flAngle, ImVec2* pOutPoint)

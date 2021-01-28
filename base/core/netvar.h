@@ -74,7 +74,7 @@
 class CRecvPropHook
 {
 public:
-	CRecvPropHook(RecvProp_t* pRecvProp, const RecvVarProxyFn pNewProxyFn)
+	explicit CRecvPropHook(RecvProp_t* pRecvProp, const RecvVarProxyFn pNewProxyFn)
 		: pRecvProp(pRecvProp), pOriginalFn(pRecvProp->oProxyFn)
 	{
 		SetProxy(pNewProxyFn);
@@ -107,9 +107,9 @@ public:
 private:
 	// Values
 	/* in future that is being modified and replace the original prop */
-	RecvProp_t* pRecvProp = nullptr;
+	RecvProp_t* pRecvProp;
 	/* original proxy function to get available restore it later */
-	RecvVarProxyFn pOriginalFn = nullptr;
+	RecvVarProxyFn pOriginalFn;
 };
 
 class CNetvarManager : public CSingleton<CNetvarManager>

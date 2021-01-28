@@ -90,11 +90,10 @@ bool ImGui::ListBox(const char* szLabel, int* iCurrentItem, std::function<const 
 		}, &pLambda, nItemsCount, iHeightInItems);
 }
 
-bool ImGui::HotKey(const char* szLabel, int* pValue)
+bool ImGui::HotKey(const char* szLabel, int* v)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* pWindow = g.CurrentWindow;
-
 	if (pWindow->SkipItems)
 		return false;
 
@@ -105,14 +104,14 @@ bool ImGui::HotKey(const char* szLabel, int* pValue)
 	const float flWidth = CalcItemWidth();
 	const ImVec2 vecLabelSize = CalcTextSize(szLabel, nullptr, true);
 
-	const ImRect rectFrame(pWindow->DC.CursorPos + ImVec2(vecLabelSize.x > 0.0f ? style.ItemInnerSpacing.x + GetFrameHeight() : 0.0f, 0.0f), pWindow->DC.CursorPos + ImVec2(flWidth, vecLabelSize.x > 0.0f ? vecLabelSize.y + style.FramePadding.y : 0.f));
-	const ImRect rectTotal(rectFrame.Min, rectFrame.Max);
+	const ImRect frame_bb(pWindow->DC.CursorPos + ImVec2(vecLabelSize.x > 0.0f ? style.ItemInnerSpacing.x + GetFrameHeight() : 0.0f, 0.0f), pWindow->DC.CursorPos + ImVec2(flWidth, vecLabelSize.x > 0.0f ? vecLabelSize.y + style.FramePadding.y : 0.f));
+	const ImRect total_bb(frame_bb.Min, frame_bb.Max);
 
-	ItemSize(rectTotal, style.FramePadding.y);
-	if (!ItemAdd(rectTotal, nIndex, &rectFrame))
+	ItemSize(total_bb, style.FramePadding.y);
+	if (!ItemAdd(total_bb, nIndex, &frame_bb))
 		return false;
 
-	const bool bHovered = ItemHoverable(rectFrame, nIndex);
+	const bool bHovered = ItemHoverable(frame_bb, nIndex);
 	if (bHovered)
 	{
 		SetHoveredID(nIndex);
@@ -128,15 +127,15 @@ bool ImGui::HotKey(const char* szLabel, int* pValue)
 		{
 			memset(io.MouseDown, 0, sizeof(io.MouseDown));
 			memset(io.KeysDown, 0, sizeof(io.KeysDown));
-			*pValue = 0;
+			*v = 0;
 		}
 
 		SetActiveID(nIndex, pWindow);
 		FocusWindow(pWindow);
 	}
 
-	bool bValueChanged = false;
-	if (int nKey = *pValue; g.ActiveId == nIndex)
+	bool bPressed = false;
+	if (int nKey = *v; g.ActiveId == nIndex)
 	{
 		for (int n = 0; n < IM_ARRAYSIZE(io.MouseDown); n++)
 		{
@@ -161,19 +160,19 @@ bool ImGui::HotKey(const char* szLabel, int* pValue)
 					break;
 				}
 
-				bValueChanged = true;
+				bPressed = true;
 				ClearActiveID();
 			}
 		}
 
-		if (!bValueChanged)
+		if (!bPressed)
 		{
 			for (int n = VK_BACK; n <= VK_RMENU; n++)
 			{
 				if (IsKeyDown(n))
 				{
 					nKey = n;
-					bValueChanged = true;
+					bPressed = true;
 					ClearActiveID();
 				}
 			}
@@ -181,28 +180,28 @@ bool ImGui::HotKey(const char* szLabel, int* pValue)
 
 		if (IsKeyPressed(io.KeyMap[ImGuiKey_Escape]))
 		{
-			*pValue = 0;
+			*v = 0;
 			ClearActiveID();
 		}
 		else
-			*pValue = nKey;
+			*v = nKey;
 	}
 
 	char chBuffer[64] = { };
-	sprintf_s(chBuffer, sizeof(chBuffer), XorStr("[ %s ]"), *pValue != 0 && g.ActiveId != nIndex ? arrKeyNames.at(*pValue) : g.ActiveId == nIndex ? XorStr("press") : XorStr("none"));
+	sprintf_s(chBuffer, sizeof(chBuffer), XorStr("[ %s ]"), *v != 0 && g.ActiveId != nIndex ? arrKeyNames.at(*v) : g.ActiveId == nIndex ? XorStr("press") : XorStr("none"));
 
 	// modified by qo0
 	PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
-	pWindow->DrawList->AddText(ImVec2(rectFrame.Max.x - CalcTextSize(chBuffer).x, rectTotal.Min.y + style.FramePadding.y), GetColorU32(g.ActiveId == nIndex ? ImGuiCol_Text : ImGuiCol_TextDisabled), chBuffer);
+	pWindow->DrawList->AddText(ImVec2(frame_bb.Max.x - CalcTextSize(chBuffer).x, total_bb.Min.y + style.FramePadding.y), GetColorU32(g.ActiveId == nIndex ? ImGuiCol_Text : ImGuiCol_TextDisabled), chBuffer);
 
 	if (vecLabelSize.x > 0.f)
-		RenderText(ImVec2(rectTotal.Min.x, rectTotal.Min.y + style.FramePadding.y), szLabel);
+		RenderText(ImVec2(total_bb.Min.x, total_bb.Min.y + style.FramePadding.y), szLabel);
 
 	PopStyleVar();
-	return bValueChanged;
+	return bPressed;
 }
 
-bool ImGui::MultiCombo(const char* szLabel, std::vector<bool>& vecValues, const std::string_view* arrItems, int nItemsCount)
+bool ImGui::MultiCombo(const char* szLabel, const char** szDisplayName, std::vector<bool>& v, int nHeightInItems)
 {
 	ImGuiContext& g = *GImGui;
 	ImGuiWindow* pWindow = g.CurrentWindow;
@@ -211,12 +210,10 @@ bool ImGui::MultiCombo(const char* szLabel, std::vector<bool>& vecValues, const 
 		return false;
 
 	const ImGuiStyle& style = g.Style;
-	const float flActiveWidth = CalcItemWidth() - (style.ItemInnerSpacing.x + GetFrameHeight()) - 40.f;
 
 	std::vector<std::string_view> vecActiveItems = { };
 
-	// collect active items
-	for (int i = 0; i < nItemsCount; i++)
+	for (int i = 0; i < nHeightInItems; i++)
 	{
 		if (vecValues[i])
 			vecActiveItems.push_back(arrItems[i]);
@@ -229,18 +226,18 @@ bool ImGui::MultiCombo(const char* szLabel, std::vector<bool>& vecValues, const 
 		szBuffer.assign("none");
 	else if (vecTextSize.x > flActiveWidth)
 	{
-		szBuffer.resize(static_cast<std::size_t>(flActiveWidth * 0.26f));
+		szBuffer.resize((std::size_t)(flActiveWidth * 0.26f));
 		szBuffer.append("...");
 	}
 
 	bool bValueChanged = false;
 	if (BeginCombo(szLabel, szBuffer.c_str()))
 	{
-		for (int i = 0; i < nItemsCount; i++)
+		for (int i = 0; i < nHeightInItems; i++)
 		{
-			if (Selectable(arrItems[i].data(), vecValues[i], ImGuiSelectableFlags_DontClosePopups))
+			if (Selectable(szDisplayName[i], v[i], ImGuiSelectableFlags_DontClosePopups))
 			{
-				vecValues[i] = !vecValues[i];
+				v[i] = !v[i];
 				bValueChanged = true;
 			}
 		}
@@ -251,7 +248,7 @@ bool ImGui::MultiCombo(const char* szLabel, std::vector<bool>& vecValues, const 
 	return bValueChanged;
 }
 
-bool ImGui::Combo(const char* szLabel, std::vector<int>& vecValues, int nIndex, const char* szItemsSeparatedByZeros, int nHeightInItems)
+bool ImGui::Combo(const char* szLabel, std::vector<int>& v, int nIndex, const char* szItemsSeparatedByZeros, int nHeightInItems)
 {
 	int iValue = vecValues[nIndex];
 	const bool bValueChanged = Combo(szLabel, &iValue, szItemsSeparatedByZeros, nHeightInItems);
@@ -259,29 +256,29 @@ bool ImGui::Combo(const char* szLabel, std::vector<int>& vecValues, int nIndex, 
 	if (bValueChanged)
 		vecValues[nIndex] = iValue;
 
-	return bValueChanged;
+	return bPressed;
 }
 
-bool ImGui::Checkbox(const char* szLabel, std::vector<bool>& vecValues, int nIndex)
+bool ImGui::Checkbox(const char* szLabel, std::vector<bool>& v, int nIndex)
 {
-	bool bValue = vecValues[nIndex];
-	const bool bValueChanged = Checkbox(szLabel, &bValue);
+	bool bValue = v[nIndex];
+	bool bPressed = Checkbox(szLabel, &bValue);
 
 	if (bValueChanged)
 		vecValues[nIndex] = bValue;
 
-	return bValueChanged;
+	return bPressed;
 }
 
-bool ImGui::SliderFloat(const char* szLabel, std::vector<float>& vecValues, int nIndex, float flMin, float flMax, const char* szFormat, float flPower)
+bool ImGui::SliderFloat(const char* szLabel, std::vector<float>& v, int nIndex, float flMin, float flMax, const char* szFormat, float flPower)
 {
-	float flValue = vecValues[nIndex];
-	const bool bValueChanged = SliderFloat(szLabel, &flValue, flMin, flMax, szFormat, flPower);
+	float flValue = v[nIndex];
+	bool bPressed = SliderFloat(szLabel, &flValue, flMin, flMax, szFormat, flPower);
 
 	if (bValueChanged)
 		vecValues[nIndex] = flValue;
 
-	return bValueChanged;
+	return bPressed;
 }
 
 bool ImGui::SliderInt(const char* szLabel, std::vector<int>& vecValues, int nIndex, int iMin, int iMax, const char* szFormat)
@@ -292,21 +289,21 @@ bool ImGui::SliderInt(const char* szLabel, std::vector<int>& vecValues, int nInd
 	if (bValueChanged)
 		vecValues[nIndex] = iValue;
 
-	return bValueChanged;
+	return bPressed;
 }
 
-bool ImGui::ColorEdit3(const char* szLabel, Color* pColor, ImGuiColorEditFlags flags)
+bool ImGui::ColorEdit3(const char* szLabel, Color* v, ImGuiColorEditFlags flags)
 {
-	return ColorEdit4(szLabel, pColor, flags);
+	return ColorEdit4(szLabel, v, flags);
 }
 
-bool ImGui::ColorEdit4(const char* szLabel, Color* pColor, ImGuiColorEditFlags flags)
+bool ImGui::ColorEdit4(const char* szLabel, Color* v, ImGuiColorEditFlags flags)
 {
 	ImVec4 vecColor = pColor->GetVec4();
 
-	if (ColorEdit4(szLabel, &vecColor.x, flags))
+	if (ImGui::ColorEdit4(szLabel, &vecColor.x, flags))
 	{
-		*pColor = Color(vecColor.x, vecColor.y, vecColor.z, vecColor.w);
+		*v = Color(vecColor.x, vecColor.y, vecColor.z, vecColor.w);
 		return true;
 	}
 
@@ -442,6 +439,7 @@ void D::Setup(IDirect3DDevice9* pDevice, unsigned int uFontFlags)
 
 	// create fonts
 	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontDefault();
 
 	ImFontConfig imWhitneyConfig;
 	imWhitneyConfig.RasterizerFlags = ImGuiFreeType::ForceAutoHint;
@@ -493,21 +491,26 @@ void D::RenderDrawData(ImDrawList* pDrawList)
 
 	for (const auto& data : vecSafeDrawData)
 	{
-		if (!data.pObject.has_value())
-			continue;
-
 		switch (data.nType)
 		{
 		case EDrawType::LINE:
 		{
-			const auto& pObject = std::any_cast<LineObject_t>(data.pObject);
-			pDrawList->AddLine(pObject.vecStart, pObject.vecEnd, pObject.colLine, pObject.flThickness);
+			pDrawList->AddLine(data.vecFirst, data.vecSecond, data.colFirst, data.flThickness);
 			break;
 		}
 		case EDrawType::RECT:
 		{
-			const auto& pObject = std::any_cast<RectObject_t>(data.pObject);
-			AddDrawListRect(pDrawList, pObject.vecMin, pObject.vecMax, pObject.colRect, pObject.uFlags, pObject.colOutline, pObject.flRounding, pObject.roundingCorners, pObject.flThickness);
+			if (data.iFlags & IMGUI_RECT_FILLED)
+				pDrawList->AddRectFilled(data.vecFirst, data.vecSecond, data.colFirst, data.flRounding, data.roundingCorners);
+			else
+				pDrawList->AddRect(data.vecFirst, data.vecSecond, data.colFirst, data.flRounding, data.roundingCorners, data.flThickness);
+
+			if (data.iFlags & IMGUI_RECT_BORDER)
+				pDrawList->AddRect(data.vecFirst + ImVec2(1.0f, 1.0f), data.vecSecond - ImVec2(1.0f, 1.0f), data.colSecond, data.flRounding, data.roundingCorners, 1.0f);
+
+			if (data.iFlags & IMGUI_RECT_OUTLINE)
+				pDrawList->AddRect(data.vecFirst - ImVec2(1.0f, 1.0f), data.vecSecond + ImVec2(1.0f, 1.0f), data.colSecond, data.flRounding, data.roundingCorners, 1.0f);
+
 			break;
 		}
 		case EDrawType::RECT_MULTICOLOR:
@@ -518,56 +521,43 @@ void D::RenderDrawData(ImDrawList* pDrawList)
 		}
 		case EDrawType::CIRCLE:
 		{
-			const auto& pObject = std::any_cast<CircleObject_t>(data.pObject);
-
-			if (pObject.uFlags & DRAW_CIRCLE_FILLED)
-				pDrawList->AddCircleFilled(pObject.vecCenter, pObject.flRadius, pObject.colCircle, pObject.nSegments);
+			if (data.iFlags & IMGUI_CIRCLE_FILLED)
+				pDrawList->AddCircleFilled(data.vecFirst, data.flRadius, data.colFirst, data.nSegments);
 			else
-				pDrawList->AddCircle(pObject.vecCenter, pObject.flRadius, pObject.colCircle, pObject.nSegments, pObject.flThickness);
+				pDrawList->AddCircle(data.vecFirst, data.flRadius, data.colFirst, data.nSegments, data.flThickness);
 
-			if (pObject.uFlags & DRAW_CIRCLE_OUTLINE)
-				pDrawList->AddCircle(pObject.vecCenter, pObject.flRadius + 1.0f, pObject.colOutline, pObject.nSegments, pObject.flThickness + 1.0f);
+			if (data.iFlags & IMGUI_CIRCLE_OUTLINE)
+				pDrawList->AddCircle(data.vecFirst, data.flRadius + 1.0f, data.colSecond, data.nSegments, 1.0f);
 
 			break;
 		}
 		case EDrawType::TRIANGLE:
 		{
-			const auto& pObject = std::any_cast<TriangleObject_t>(data.pObject);
-
-			if (pObject.uFlags & DRAW_TRIANGLE_FILLED)
-				pDrawList->AddTriangleFilled(pObject.vecFirst, pObject.vecSecond, pObject.vecThird, pObject.colTriangle);
+			if (data.iFlags & IMGUI_TRIANGLE_FILLED)
+				pDrawList->AddTriangleFilled(data.vecFirst, data.vecSecond, data.vecThird, data.colFirst);
 			else
-				pDrawList->AddTriangle(pObject.vecFirst, pObject.vecSecond, pObject.vecThird, pObject.colTriangle, pObject.flThickness);
+				pDrawList->AddTriangle(data.vecFirst, data.vecSecond, data.vecThird, data.colFirst, data.flThickness);
 
-			if (pObject.uFlags & DRAW_TRIANGLE_OUTLINE)
-				pDrawList->AddTriangle(pObject.vecFirst, pObject.vecSecond, pObject.vecThird, pObject.colOutline, pObject.flThickness + 1.0f);
-
-			break;
-		}
-		case EDrawType::POLYGON:
-		{
-			const auto& pObject = std::any_cast<PolygonObject_t>(data.pObject);
-
-			if (pObject.uFlags & DRAW_POLYGON_FILLED)
-				pDrawList->AddConvexPolyFilled(pObject.vecPoints.data(), pObject.vecPoints.size(), pObject.colPolygon);
-			else
-				pDrawList->AddPolyline(pObject.vecPoints.data(), pObject.vecPoints.size(), pObject.colPolygon, pObject.bClosed, pObject.flThickness);
-
-			if (pObject.uFlags & DRAW_POLYGON_OUTLINE)
-				pDrawList->AddPolyline(pObject.vecPoints.data(), pObject.vecPoints.size(), pObject.colOutline, pObject.bClosed, pObject.flThickness + 1.0f);
+			if (data.iFlags & IMGUI_TRIANGLE_OUTLINE)
+				pDrawList->AddTriangle(data.vecFirst, data.vecSecond, data.vecThird, data.colSecond, 2.0f);
 
 			break;
 		}
 		case EDrawType::TEXT:
 		{
-			const auto& pObject = std::any_cast<TextObject_t>(data.pObject);
-			AddDrawListText(pDrawList, pObject.pFont, pObject.flFontSize, pObject.vecPosition, pObject.szText, pObject.colText, pObject.uFlags, pObject.colOutline);
-			break;
-		}
-		case EDrawType::IMAGE:
-		{
-			const auto& pObject = std::any_cast<ImageObject_t>(data.pObject);
-			pDrawList->AddImageRounded(pObject.pTexture, pObject.vecMin, pObject.vecMax, ImVec2(0, 0), ImVec2(1, 1), pObject.colImage, pObject.flRounding, pObject.roundingCorners);
+			// set font texture
+			pDrawList->PushTextureID(data.pFont->ContainerAtlas->TexID);
+
+			if (data.iFlags & IMGUI_TEXT_DROPSHADOW)
+				pDrawList->AddText(data.pFont, data.flFontSize, data.vecFirst + ImVec2(1.0f, -1.0f), data.colSecond, data.szText.data());
+			else if (data.iFlags & IMGUI_TEXT_OUTLINE)
+			{
+				pDrawList->AddText(data.pFont, data.flFontSize, data.vecFirst + ImVec2(1.0f, -1.0f), data.colSecond, data.szText.data());
+				pDrawList->AddText(data.pFont, data.flFontSize, data.vecFirst + ImVec2(-1.0f, 1.0f), data.colSecond, data.szText.data());
+			}
+
+			pDrawList->AddText(data.pFont, data.flFontSize, data.vecFirst, data.colFirst, data.szText.data());
+			pDrawList->PopTextureID();
 			break;
 		}
 		default:
@@ -590,14 +580,15 @@ void D::SwapDrawData()
 #pragma endregion
 
 #pragma region draw_render
-void D::AddLine(const ImVec2& vecStart, const ImVec2& vecEnd, const Color& colLine, float flThickness)
+void D::AddLine(const ImVec2& vecStart, const ImVec2& vecEnd, Color colLine, float flThickness)
 {
-	vecDrawData.emplace_back(EDrawType::LINE, std::make_any<LineObject_t>(LineObject_t{ vecStart, vecEnd, colLine.GetU32(), flThickness }));
-}
-
-void D::AddRect(const ImVec2& vecMin, const ImVec2& vecMax, const Color& colRect, unsigned int uFlags, const Color& colOutline, float flRounding, ImDrawCornerFlags roundingCorners, float flThickness)
-{
-	vecDrawData.emplace_back(EDrawType::RECT, std::make_any<RectObject_t>(RectObject_t{ vecMin, vecMax, colRect.GetU32(), uFlags, colOutline.GetU32(), flRounding, roundingCorners, flThickness }));
+	DrawObject_t draw = { };
+	draw.nType = EDrawType::LINE;
+	draw.vecFirst = vecStart;
+	draw.vecSecond = vecEnd;
+	draw.colFirst = colLine.GetU32();
+	draw.flThickness = flThickness;
+	vecDrawData.emplace_back(draw);
 }
 
 void D::AddRectMultiColor(const ImVec2& vecMin, const ImVec2& vecMax, const Color& colUpperLeft, const Color& colUpperRight, const Color& colBottomRight, const Color& colBottomLeft)
@@ -605,73 +596,70 @@ void D::AddRectMultiColor(const ImVec2& vecMin, const ImVec2& vecMax, const Colo
 	vecDrawData.emplace_back(EDrawType::RECT_MULTICOLOR, std::make_any<RectMultiColorObject_t>(RectMultiColorObject_t{ vecMin, vecMax, colUpperLeft.GetU32(), colUpperRight.GetU32(), colBottomRight.GetU32(), colBottomLeft.GetU32() }));
 }
 
-void D::AddCircle(const ImVec2& vecCenter, float flRadius, const Color& colCircle, int nSegments, unsigned int uFlags, const Color& colOutline, float flThickness)
+void D::AddRectMultiColor(const ImVec2& vecMin, const ImVec2& vecMax, Color colUpperLeft, Color colUpperRight, Color colBottomLeft, Color colBottomRight)
 {
-	vecDrawData.emplace_back(EDrawType::CIRCLE, std::make_any<CircleObject_t>(CircleObject_t{ vecCenter, flRadius, colCircle.GetU32(), nSegments, uFlags, colOutline.GetU32(), flThickness }));
+	DrawObject_t draw = { };
+	draw.nType = EDrawType::RECT_MULTICOLOR;
+	draw.vecFirst = vecMin;
+	draw.vecSecond = vecMax;
+	draw.colFirst = colUpperLeft.GetU32();
+	draw.colSecond = colUpperRight.GetU32();
+	draw.colThird = colBottomLeft.GetU32();
+	draw.colFourth = colBottomRight.GetU32();
+	vecDrawData.emplace_back(draw);
 }
 
-void D::AddTriangle(const ImVec2& vecFirst, const ImVec2& vecSecond, const ImVec2& vecThird, const Color& colTriangle, unsigned int uFlags, const Color& colOutline, float flThickness)
+void D::AddCircle(const ImVec2& vecCenter, float flRadius, Color colCircle, int nSegments, int iFlags, Color colOutline, float flThickness)
 {
-	vecDrawData.emplace_back(EDrawType::TRIANGLE, std::make_any<TriangleObject_t>(TriangleObject_t{ vecFirst, vecSecond, vecThird, colTriangle.GetU32(), uFlags, colOutline.GetU32(), flThickness }));
+	DrawObject_t draw = { };
+	draw.nType = EDrawType::CIRCLE;
+	draw.vecFirst = vecCenter;
+	draw.flRadius = flRadius;
+	draw.nSegments = nSegments;
+	draw.colFirst = colCircle.GetU32();
+	draw.iFlags = iFlags;
+	draw.colSecond = colOutline.GetU32();
+	draw.flThickness = flThickness;
+	vecDrawData.emplace_back(draw);
 }
 
-void D::AddPolygon(std::vector<ImVec2>& vecPoints, const Color& colPolygon, unsigned int uFlags, const Color& colOutline, bool bClosed, float flThickness)
+void D::AddTriangle(const ImVec2& vecFirst, const ImVec2& vecSecond, const ImVec2& vecThird, Color colTriangle, int iFlags, Color colOutline, float flThickness)
 {
-	vecDrawData.emplace_back(EDrawType::POLYGON, std::make_any<PolygonObject_t>(PolygonObject_t{ std::move(vecPoints), colPolygon.GetU32(), uFlags, colOutline.GetU32(), bClosed, flThickness }));
+	DrawObject_t draw = { };
+	draw.nType = EDrawType::TRIANGLE;
+	draw.vecFirst = vecFirst;
+	draw.vecSecond = vecSecond;
+	draw.vecThird = vecThird;
+	draw.colFirst = colTriangle.GetU32();
+	draw.iFlags = iFlags;
+	draw.colSecond = colOutline.GetU32();
+	draw.flThickness = flThickness;
+	vecDrawData.emplace_back(draw);
 }
 
-void D::AddText(const ImFont* pFont, float flFontSize, const ImVec2& vecPosition, const std::string& szText, const Color& colText, unsigned int uFlags, const Color& colOutline)
+void D::AddText(const ImFont* pFont, float flFontSize, const ImVec2& vecPosition, const std::string& szText, Color colText, int iFlags, Color colOutline)
 {
 	if (pFont->ContainerAtlas == nullptr)
 		return;
 
 	// check is only one flag selected
-	IM_ASSERT(ImIsPowerOfTwo(uFlags == DRAW_TEXT_NONE || uFlags & (DRAW_TEXT_DROPSHADOW | DRAW_TEXT_OUTLINE)));
+	IM_ASSERT(ImIsPowerOfTwo(iFlags == IMGUI_TEXT_NONE || iFlags & (IMGUI_TEXT_DROPSHADOW | IMGUI_TEXT_OUTLINE)));
 
-	vecDrawData.emplace_back(EDrawType::TEXT, std::make_any<TextObject_t>(TextObject_t{ pFont, flFontSize, vecPosition, szText, colText.GetU32(), uFlags, colOutline.GetU32() }));
+	DrawObject_t draw = { };
+	draw.nType = EDrawType::TEXT;
+	draw.pFont = pFont;
+	draw.flFontSize = flFontSize;
+	draw.vecFirst = vecPosition;
+	draw.szText = szText;
+	draw.colFirst = colText.GetU32();
+	draw.iFlags = iFlags;
+	draw.colSecond = colOutline.GetU32();
+	vecDrawData.emplace_back(draw);
 }
 
-void D::AddText(const ImVec2& vecPosition, const std::string& szText, const Color& colText, int iFlags, const Color& colOutline)
+void D::AddText(const ImVec2& vecPosition, const std::string& szText, Color colText, int iFlags, Color colOutline)
 {
 	AddText(nullptr, 0.f, vecPosition, szText, colText, iFlags, colOutline);
-}
-
-void D::AddImage(ImTextureID pTexture, const ImVec2& vecMin, const ImVec2& vecMax, const Color& colImage, float flRounding, ImDrawCornerFlags roundingCorners)
-{
-	vecDrawData.emplace_back(EDrawType::IMAGE, std::make_any<ImageObject_t>(ImageObject_t{ pTexture, vecMin, vecMax, colImage.GetU32(), flRounding, roundingCorners }));
-}
-#pragma endregion
-
-#pragma region draw_bindings
-void D::AddDrawListRect(ImDrawList* pDrawList, const ImVec2& vecMin, const ImVec2& vecMax, ImU32 colRect, unsigned int uFlags, ImU32 colOutline, float flRounding, ImDrawCornerFlags roundingCorners, float flThickness)
-{
-	if (uFlags & DRAW_RECT_FILLED)
-		pDrawList->AddRectFilled(vecMin, vecMax, colRect, flRounding, roundingCorners);
-	else
-		pDrawList->AddRect(vecMin, vecMax, colRect, flRounding, roundingCorners, flThickness);
-
-	if (uFlags & DRAW_RECT_BORDER)
-		pDrawList->AddRect(vecMin + ImVec2(1.0f, 1.0f), vecMax - ImVec2(1.0f, 1.0f), colOutline, flRounding, roundingCorners, 1.0f);
-
-	if (uFlags & DRAW_RECT_OUTLINE)
-		pDrawList->AddRect(vecMin - ImVec2(1.0f, 1.0f), vecMax + ImVec2(1.0f, 1.0f), colOutline, flRounding, roundingCorners, 1.0f);
-}
-
-void D::AddDrawListText(ImDrawList* pDrawList, const ImFont* pFont, float flFontSize, const ImVec2& vecPosition, const std::string& szText, ImU32 colText, unsigned int uFlags, ImU32 colOutline)
-{
-	// set font texture
-	pDrawList->PushTextureID(pFont->ContainerAtlas->TexID);
-
-	if (uFlags & DRAW_TEXT_DROPSHADOW)
-		pDrawList->AddText(pFont, flFontSize, vecPosition + ImVec2(1.0f, -1.0f), colOutline, szText.c_str());
-	else if (uFlags & DRAW_TEXT_OUTLINE)
-	{
-		pDrawList->AddText(pFont, flFontSize, vecPosition + ImVec2(1.0f, -1.0f), colOutline, szText.c_str());
-		pDrawList->AddText(pFont, flFontSize, vecPosition + ImVec2(-1.0f, 1.0f), colOutline, szText.c_str());
-	}
-
-	pDrawList->AddText(pFont, flFontSize, vecPosition, colText, szText.data());
-	pDrawList->PopTextureID();
 }
 #pragma endregion
 
