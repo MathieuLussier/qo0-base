@@ -156,23 +156,23 @@ void CRageBot::Run(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 	if (pWeapon->GetAmmo() == 0 || !pWeapon->IsWeapon() || pWeaponData->nWeaponType == WEAPONTYPE_KNIFE || pWeaponData->nWeaponType == WEAPONTYPE_GRENADE || pWeaponData->nWeaponType == WEAPONTYPE_FISTS || pWeaponData->nWeaponType == WEAPONTYPE_C4)
 		return;
 
-	CRageBot::UpdateSettings(pCmd, pLocal);
-	CRageBot::Rage(pCmd, pLocal, bSendPacket);
+	UpdateSettings(pCmd, pLocal);
+	Rage(pCmd, pLocal, bSendPacket);
 }
 
 void CRageBot::Rage(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket) {
 
     // Position Adjustment
     if (bPositionAdjustment)
-        CRageBot::PositionAdjustment(pCmd, pLocal);
+	    PositionAdjustment(pCmd, pLocal);
 
     // Aimbot
     if (bAimbotEnable)
-        CRageBot::DoAimbot(pCmd, pLocal, bSendPacket);
+	    DoAimbot(pCmd, pLocal, bSendPacket);
 
     // Recoil
     if (bDoNoRecoil)
-        CRageBot::DoNoRecoil(pLocal);
+	    DoNoRecoil(pLocal);
 
     LastAngle = pCmd->angViewPoint;
 }
@@ -214,7 +214,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
     if (TargetID >= 0 && HitBox >= 0)
     {
         pTarget = I::ClientEntityList->Get<CBaseEntity>(TargetID);
-        if (pTarget && CRageBot::TargetMeetsRequirements(pTarget, pLocal))
+        if (pTarget && TargetMeetsRequirements(pTarget, pLocal))
         {
             HitBox = HitScan(pTarget, pLocal);
             if (HitBox >= 0)
@@ -314,8 +314,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
         }
         else
         {
-            if ((ihitchance <= CRageBot::HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal)))
-            //if ((ihitchance <= CRageBot::hitchance(pLocal, pWeapon)))
+            if ((ihitchance <= HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal)))
             {
                 if (AimAtPoint(pLocal, Point, pCmd, bSendPacket))
                 {
@@ -356,7 +355,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
 
 int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* pWeapon, CBaseEntity* pLocal)
 {
-    int hitseed = 100;
+    const int hitseed = 100;
 
     int iHit = 0;
     int iHitsNeed = (int)((float)hitseed * ((float)ihitchance / 100.f));
@@ -398,13 +397,12 @@ int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* p
         M::AngleVectors(qaNewAngle, &vEnd);
         vEnd = pLocal->GetEyePosition() + (vEnd * 8192.f);
 
+        Trace_t trace = { };
         FireBulletData_t bulletData = {};
-        float dmg = CAutoWall::Get().GetDamage(pLocal, vEnd, bulletData);
 
-        if (entity->GetHealth() < imin_damage)
-            imin_damage = entity->GetHealth();
+        trace = bulletData.enterTrace;
 
-        if (dmg >= imin_damage)
+    	if (trace.pHitEntity == entity)
             iHit++;
 
         iHitchance = (int)(((float)iHit / 100.f) * 100.f);
@@ -417,23 +415,6 @@ int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* p
             break;
     }
     return iHitchance;
-}
-
-int CRageBot::hitchance(CBaseEntity* pLocal, CBaseCombatWeapon* pWeapon)
-{
-    //	CBaseCombatWeapon* pWeapon = (CBaseCombatWeapon*)Interfaces::EntList->GetClientEntityFromHandle(pLocal->GetActiveWeaponHandle());
-    int hitchance = 101;
-    if (!pWeapon) return 0;
-    if (ihitchance > 1)
-    {//Inaccuracy method
-        pWeapon->UpdateAccuracyPenalty();
-        float inaccuracy = pWeapon->GetInaccuracy();
-        if (inaccuracy == 0) inaccuracy = 0.0000001;
-        inaccuracy = 1 / inaccuracy;
-        hitchance = inaccuracy;
-
-    }
-    return hitchance;
 }
 
 bool CRageBot::IsAbleToShoot(CBaseEntity* pLocal)
