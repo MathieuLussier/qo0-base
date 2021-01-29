@@ -314,7 +314,9 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
         }
         else
         {
-            if ((ihitchance <= HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal)))
+            int temp_hitchance = HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal);
+            L::Print(fmt::format(XorStr("[RageBot] Hitchance {} "), temp_hitchance));
+            if (ihitchance <= temp_hitchance)
             {
                 if (AimAtPoint(pLocal, Point, pCmd, bSendPacket))
                 {
@@ -397,14 +399,13 @@ int CRageBot::HitChance(QAngle angles, CBaseEntity* entity, CBaseCombatWeapon* p
         M::AngleVectors(qaNewAngle, &vEnd);
         vEnd = pLocal->GetEyePosition() + (vEnd * 8192.f);
 
-        Trace_t trace = { };
-        FireBulletData_t bulletData = {};
+        FireBulletData_t data = { };
 
-        trace = bulletData.enterTrace;
+        float dmg = CAutoWall::Get().GetDamage(pLocal, vEnd, data);
 
-    	if (trace.pHitEntity == entity)
+        if (dmg > 0.f)
             iHit++;
-
+    	
         iHitchance = (int)(((float)iHit / 100.f) * 100.f);
 
         if ((int)(((float)iHit / 100.f) * 100.f) >= ihitchance) {
