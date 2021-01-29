@@ -314,9 +314,7 @@ void CRageBot::DoAimbot(CUserCmd* pCmd, CBaseEntity* pLocal, bool& bSendPacket)
         }
         else
         {
-            int temp_hitchance = HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal);
-            L::Print(fmt::format(XorStr("[RageBot] Hitchance {} "), temp_hitchance));
-            if (ihitchance <= temp_hitchance)
+            if (ihitchance <= HitChance(M::CalcAngle(Start, Point), pTarget, pWeapon, pLocal))
             {
                 if (AimAtPoint(pLocal, Point, pCmd, bSendPacket))
                 {
