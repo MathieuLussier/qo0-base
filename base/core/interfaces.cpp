@@ -16,7 +16,7 @@ bool I::Setup()
 	EngineVGui =		Capture<IEngineVGui>(ENGINE_DLL, XorStr("VEngineVGui"));
 	EngineTrace =		Capture<IEngineTrace>(ENGINE_DLL, XorStr("EngineTraceClient"));
 	EngineSound =		Capture<IEngineSound>(ENGINE_DLL, XorStr("IEngineSoundClient"));
-	StringContainer =	Capture<INetworkContainer>(ENGINE_DLL, XorStr("VEngineClientStringTable"));
+	NetworkContainer =	Capture<INetworkContainer>(ENGINE_DLL, XorStr("VEngineClientStringTable"));
 	GameEvent =			Capture<IGameEventManager2>(ENGINE_DLL, XorStr("GAMEEVENTSMANAGER002"));
 	RenderView =		Capture<IVRenderView>(ENGINE_DLL, XorStr("VEngineRenderView"));
 	DebugOverlay =		Capture<IVDebugOverlay>(ENGINE_DLL, XorStr("VDebugOverlay"));
@@ -67,6 +67,10 @@ bool I::Setup()
 	if (DirectDevice == nullptr)
 		return false;
 
+	ViewRender = **reinterpret_cast<IViewRender***>(MEM::FindPattern(CLIENT_DLL, XorStr("8B 0D ? ? ? ? FF 75 0C 8B 45 08")) + 0x2);
+	if (ViewRender == nullptr)
+		return false;
+
 	ViewRenderBeams = *reinterpret_cast<IViewRenderBeams**>(MEM::FindPattern(CLIENT_DLL, XorStr("B9 ? ? ? ? A1 ? ? ? ? FF 10 A1 ? ? ? ? B9")) + 0x1); // @xref: "r_drawbrushmodels"
 	if (ViewRenderBeams == nullptr)
 		return false;
@@ -93,7 +97,7 @@ bool I::Setup()
 template <typename T>
 T* I::Capture(const char* szModule, std::string_view szInterface)
 {
-	static auto GetRegisterList = [szModule]() -> CInterfaceRegister*
+	const auto GetRegisterList = [&szModule]() -> CInterfaceRegister*
 	{
 		FARPROC oCreateInterface = nullptr;
 

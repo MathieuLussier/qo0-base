@@ -411,8 +411,8 @@
     <ClInclude Include="sdk\interfaces\iglobalvars.h">
       <Filter>include\sdk\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="features\backtrack.h">
-      <Filter>include\features</Filter>
+    <ClInclude Include="sdk\interfaces\imaterial.h">
+      <Filter>include\sdk\interfaces</Filter>
     </ClInclude>
     <ClInclude Include="sdk\interfaces\iviewrender.h">
       <Filter>include\sdk\interfaces</Filter>

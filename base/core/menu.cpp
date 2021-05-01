@@ -19,7 +19,6 @@
 // used: inputtext() wrappers for c++ standard library (stl) type: std::string
 #include "../../dependencies/imgui/cpp/imgui_stdlib.h"
 
-#pragma region menu_arrays
 const std::pair<const char*, std::uint32_t> arrColors[] =
 {
 	{ "[esp] box - enemies", Vars.colEspMainBoxEnemies },
@@ -44,7 +43,8 @@ const std::pair<const char*, std::uint32_t> arrColors[] =
 	{ "[screen] hitmarker - damage", Vars.colScreenHitMarkerDamage }
 };
 
-const char* arrVisualsFlags[] =
+#pragma region menu_array_entries
+static constexpr std::array<std::string_view, 4U> arrVisualsFlags =
 {
 	"helmet",
 	"kevlar",
@@ -52,7 +52,7 @@ const char* arrVisualsFlags[] =
 	"zoom"
 };
 
-const char* arrVisualsRemovals[] =
+static constexpr std::array<std::string_view, 4U> arrVisualsRemovals =
 {
 	"post-processing",
 	"punch",
@@ -577,7 +577,6 @@ void T::Visuals()
 					{
 						ImGui::Checkbox(XorStr("health##player"), &C::Get<bool>(Vars.bEspMainPlayerHealth));
 						ImGui::Checkbox(XorStr("money##player"), &C::Get<bool>(Vars.bEspMainPlayerMoney));
-						//ImGui::Checkbox(XorStr("rank##player"), &C::Get<bool>(Vars.bEspMainPlayerRank));
 						ImGui::Checkbox(XorStr("name##player"), &C::Get<bool>(Vars.bEspMainPlayerName));
 						ImGui::Checkbox(XorStr("flash##player"), &C::Get<bool>(Vars.bEspMainPlayerFlash));
 						ImGui::MultiCombo(XorStr("flags##player"), arrVisualsFlags, C::Get<std::vector<bool>>(Vars.vecEspMainPlayerFlags), IM_ARRAYSIZE(arrVisualsFlags));
@@ -680,8 +679,8 @@ void T::Visuals()
 			}
 
 			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(style.FramePadding.x, -1));
-			ImGui::SliderFloat(XorStr("camera fov"), &C::Get<float>(Vars.flScreenCameraFOV), -89.f, 89.f, u8"%.1f\u00B0");
-			ImGui::SliderFloat(XorStr("viewmodel fov"), &C::Get<float>(Vars.flScreenViewModelFOV), -90.f, 90.f, u8"%.1f\u00B0");
+			ImGui::SliderFloat(XorStr("camera fov"), &C::Get<float>(Vars.flScreenCameraFOV), -89.f, 89.f, "%.1f\xC2\xB0");
+			ImGui::SliderFloat(XorStr("viewmodel fov"), &C::Get<float>(Vars.flScreenViewModelFOV), -90.f, 90.f, "%.1f\xC2\xB0");
 			ImGui::Separator();
 
 			ImGui::Checkbox(XorStr("force crosshair"), &C::Get<bool>(Vars.bScreenForceCrosshair));

@@ -133,7 +133,7 @@ void CAntiAim::UpdateServerAnimations(CUserCmd* pCmd, CBaseEntity* pLocal)
 	if (bAllocate || bChange)
 	{
 		// create temporary animstate
-		CBasePlayerAnimState* pAnimState = static_cast<CBasePlayerAnimState*>(I::MemAlloc->Alloc(sizeof(CBasePlayerAnimState)));
+		CCSGOPlayerAnimState* pAnimState = static_cast<CCSGOPlayerAnimState*>(I::MemAlloc->Alloc(sizeof(CCSGOPlayerAnimState)));
 
 		if (pAnimState != nullptr)
 			pAnimState->Create(pLocal);
@@ -312,7 +312,7 @@ void CAntiAim::CorrectMovement(float OldAngleY, CUserCmd* pCmd, float fOldForwar
 	pCmd->flSideMove = sin(M::Deg2rad(deltaView)) * fOldForward + sin(M::Deg2rad(deltaView + 90.f)) * fOldSidemove;
 }
 
-float CAntiAim::GetMaxDesyncDelta(CBasePlayerAnimState* pAnimState)
+float CAntiAim::GetMaxDesyncDelta(CCSGOPlayerAnimState* pAnimState)
 {
 	float flDuckAmount = pAnimState->flDuckAmount;
 	float flRunningSpeed = std::clamp(pAnimState->flRunningSpeed, 0.0f, 1.0f);
