@@ -1,15 +1,15 @@
 #pragma once
-// @credits: https://github.com/ValveSoftware/source-sdk-2013/blob/master/sp/src/public/mathlib/vector.h
-
 // used: isfinite, fmodf, sqrtf
 #include <cmath>
-// used: numeric_limits
-#include <limits>
+
+// @credits: https://github.com/ValveSoftware/source-sdk-2013/blob/master/sp/src/public/mathlib/vector.h
 
 class Vector2D
 {
 public:
-	constexpr Vector2D(float x = 0.f, float y = 0.f) :
+	Vector2D() = default;
+
+	constexpr Vector2D(float x, float y) :
 		x(x), y(y) { }
 
 	[[nodiscard]] bool IsZero() const
@@ -198,7 +198,7 @@ public:
 		return (*this - vecEnd).Length();
 	}
 
-	[[nodiscard]] constexpr float DistToSqr(const Vector& vecEnd) const
+	[[nodiscard]] float DistToSqr(const Vector& vecEnd) const
 	{
 		return (*this - vecEnd).LengthSqr();
 	}
@@ -227,7 +227,7 @@ public:
 		return (this->x * vecDot.x + this->y * vecDot.y + this->z * vecDot.z);
 	}
 
-	[[nodiscard]] constexpr Vector CrossProduct(const Vector& vecCross) const
+	[[nodiscard]] Vector CrossProduct(const Vector& vecCross) const
 	{
 		return Vector(this->y * vecCross.z - this->z * vecCross.y, this->z * vecCross.x - this->x * vecCross.z, this->x * vecCross.y - this->y * vecCross.x);
 	}
@@ -239,8 +239,11 @@ public:
 class Vector4D
 {
 public:
-	constexpr Vector4D(float x = 0.f, float y = 0.f, float z = 0.f, float w = 0.f) :
-		x(x), y(y), z(z), w(w) { }
+	Vector4D() = default;
+	Vector4D(float x, float y, float z, float w)
+	{
+		this->x = x; this->y = y; this->z = z; this->w = w;
+	}
 
 public:
 	float x, y, z, w;

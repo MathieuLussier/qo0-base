@@ -50,11 +50,11 @@ std::optional<Vector> CBaseEntity::GetBonePosition(int iBone)
 	return std::nullopt;
 }
 
-int CBaseEntity::GetBoneByHash(const FNV1A_t uBoneHash) const
+int CBaseEntity::GetBoneByHash(const FNV1A_t uBoneHash)
 {
-	if (const auto pModel = this->GetModel(); pModel != nullptr)
+	if (auto pModel = this->GetModel(); pModel != nullptr)
 	{
-		if (const auto pStudioHdr = I::ModelInfo->GetStudioModel(pModel); pStudioHdr != nullptr)
+		if (auto pStudioHdr = I::ModelInfo->GetStudioModel(pModel); pStudioHdr != nullptr)
 		{
 			for (int i = 0; i < pStudioHdr->nBones; i++)
 			{
@@ -73,17 +73,19 @@ std::optional<Vector> CBaseEntity::GetHitboxPosition(int iHitbox)
 
 	std::array<matrix3x4_t, MAXSTUDIOBONES> arrBonesToWorld = { };
 
-	if (const auto pModel = this->GetModel(); pModel != nullptr)
+	if (auto pModel = this->GetModel(); pModel != nullptr)
 	{
-		if (const auto pStudioHdr = I::ModelInfo->GetStudioModel(pModel); pStudioHdr != nullptr)
+		if (auto pStudioModel = I::ModelInfo->GetStudioModel(pModel); pStudioModel != nullptr)
 		{
-			if (const auto pHitbox = pStudioHdr->GetHitbox(iHitbox, 0); pHitbox != nullptr)
+			if (auto pHitbox = pStudioModel->GetHitbox(iHitbox, 0); pHitbox != nullptr)
 			{
 				if (this->SetupBones(arrBonesToWorld.data(), MAXSTUDIOBONES, BONE_USED_BY_HITBOX, 0.f))
 				{
+					Vector vecMin = { }, vecMax = { };
+
 					// get mins/maxs by bone
-					const Vector vecMin = M::VectorTransform(pHitbox->vecBBMin, arrBonesToWorld.at(pHitbox->iBone));
-					const Vector vecMax = M::VectorTransform(pHitbox->vecBBMax, arrBonesToWorld.at(pHitbox->iBone));
+					vecMin = M::VectorTransform(pHitbox->vecBBMin, arrBonesToWorld.at(pHitbox->iBone));
+					vecMax = M::VectorTransform(pHitbox->vecBBMax, arrBonesToWorld.at(pHitbox->iBone));
 
 					// get center
 					return (vecMin + vecMax) * 0.5f;
@@ -101,11 +103,11 @@ std::optional<Vector> CBaseEntity::GetHitGroupPosition(int iHitGroup)
 
 	std::array<matrix3x4_t, MAXSTUDIOBONES> arrBonesToWorld = { };
 
-	if (const auto pModel = this->GetModel(); pModel != nullptr)
+	if (auto pModel = this->GetModel(); pModel != nullptr)
 	{
-		if (const auto pStudioHdr = I::ModelInfo->GetStudioModel(pModel); pStudioHdr != nullptr)
+		if (auto pStudioModel = I::ModelInfo->GetStudioModel(pModel); pStudioModel != nullptr)
 		{
-			if (const auto pHitboxSet = pStudioHdr->GetHitboxSet(this->GetHitboxSet()); pHitboxSet != nullptr)
+			if (auto pHitboxSet = pStudioModel->GetHitboxSet(this->GetHitboxSet()); pHitboxSet != nullptr)
 			{
 				if (this->SetupBones(arrBonesToWorld.data(), MAXSTUDIOBONES, BONE_USED_BY_HITBOX, 0.f))
 				{
@@ -121,9 +123,11 @@ std::optional<Vector> CBaseEntity::GetHitGroupPosition(int iHitGroup)
 
 					if (pHitbox != nullptr)
 					{
+						Vector vecMin = { }, vecMax = { };
+
 						// get mins/maxs by bone
-						const Vector vecMin = M::VectorTransform(pHitbox->vecBBMin, arrBonesToWorld.at(pHitbox->iBone));
-						const Vector vecMax = M::VectorTransform(pHitbox->vecBBMax, arrBonesToWorld.at(pHitbox->iBone));
+						vecMin = M::VectorTransform(pHitbox->vecBBMin, arrBonesToWorld.at(pHitbox->iBone));
+						vecMax = M::VectorTransform(pHitbox->vecBBMax, arrBonesToWorld.at(pHitbox->iBone));
 
 						// get center
 						return (vecMin + vecMax) * 0.5f;
@@ -136,7 +140,7 @@ std::optional<Vector> CBaseEntity::GetHitGroupPosition(int iHitGroup)
 	return std::nullopt;
 }
 
-void CBaseEntity::ModifyEyePosition(CCSGOPlayerAnimState* pAnimState, Vector* vecPosition) const
+void CBaseEntity::ModifyEyePosition(CBasePlayerAnimState* pAnimState, Vector* vecPosition) const
 {
 	if (I::Engine->IsHLTV() || I::Engine->IsPlayingDemo())
 		return;
@@ -175,7 +179,7 @@ int CBaseEntity::PostThink()
 	static auto oPostThinkVPhysics = reinterpret_cast<PostThinkVPhysicsFn>(MEM::FindPattern(CLIENT_DLL, XorStr("55 8B EC 83 E4 F8 81 EC ? ? ? ? 53 8B D9 56 57 83 BB")));
 
 	using SimulatePlayerSimulatedEntitiesFn = void(__thiscall*)(CBaseEntity*);
-	static auto oSimulatePlayerSimulatedEntities = reinterpret_cast<SimulatePlayerSimulatedEntitiesFn>(MEM::FindPattern(CLIENT_DLL, XorStr("56 8B F1 8B 8E ? ? ? ? 83 F9 FF 74 23")));
+	static auto oSimulatePlayerSimulatedEntities = reinterpret_cast<SimulatePlayerSimulatedEntitiesFn>(MEM::FindPattern(CLIENT_DLL, XorStr("56 8B F1 57 8B BE ? ? ? ? 83 EF 01 78 72")));
 
 	// begin lock
 	MEM::CallVFunc<void>(I::MDLCache, 33);

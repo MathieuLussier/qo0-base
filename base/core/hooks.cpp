@@ -29,7 +29,7 @@
 #include "../features/misc.h"
 #include "../features/skinchanger.h"
 
-static constexpr std::array<const char*, 3U> arrSmokeMaterials =
+constexpr std::array<const char*, 3U> arrSmokeMaterials =
 {
 	//"particle/vistasmokev1/vistasmokev1_fire",  // to look cool fresh fashionable yo :sunglasses: (if u wont be cool just uncomment this)
 	"particle/vistasmokev1/vistasmokev1_smokegrenade",
@@ -80,9 +80,6 @@ bool H::Setup()
 		return false;
 
 	if (!DTR::DrawModel.Create(MEM::GetVFunc(I::StudioRender, VTABLE::DRAWMODEL), &hkDrawModel))
-		return false;
-
-	if (!DTR::RenderSmokeOverlay.Create(MEM::GetVFunc(I::ViewRender, VTABLE::RENDERSMOKEOVERLAY), &hkRenderSmokeOverlay))
 		return false;
 
 	if (!DTR::RunCommand.Create(MEM::GetVFunc(I::Prediction, VTABLE::RUNCOMMAND), &hkRunCommand))
@@ -187,6 +184,16 @@ long D3DAPI H::hkEndScene(IDirect3DDevice9* pDevice)
 		if (!D::bInitialized)
 			D::Setup(pDevice);
 
+		DWORD dwColorWriteOld = 0UL, dwSRGBWriteOld = 0UL;
+
+		// save
+		pDevice->GetRenderState(D3DRS_COLORWRITEENABLE, &dwColorWriteOld);
+		pDevice->GetRenderState(D3DRS_SRGBWRITEENABLE, &dwSRGBWriteOld);
+
+		// set
+		pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE | D3DCOLORWRITEENABLE_ALPHA);
+		pDevice->SetRenderState(D3DRS_SRGBWRITEENABLE, false);
+
 		ImGui_ImplDX9_NewFrame();
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
@@ -199,6 +206,10 @@ long D3DAPI H::hkEndScene(IDirect3DDevice9* pDevice)
 
 		// render draw lists from draw data
 		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+
+		// restore
+		pDevice->SetRenderState(D3DRS_COLORWRITEENABLE, dwColorWriteOld);
+		pDevice->SetRenderState(D3DRS_SRGBWRITEENABLE, dwSRGBWriteOld);
 	}
 
 	return oEndScene(pDevice);
@@ -391,7 +402,7 @@ void FASTCALL H::hkFrameStageNotify(IBaseClientDll* thisptr, int edx, EClientFra
 	if (pLocal == nullptr)
 		return oFrameStageNotify(thisptr, edx, stage);
 
-	static QAngle angOldAimPunch = { }, angOldViewPunch = { };
+	static QAngle angAimPunchOld = { }, angViewPunchOld = { };
 
 	switch (stage)
 	{
@@ -444,12 +455,17 @@ void FASTCALL H::hkFrameStageNotify(IBaseClientDll* thisptr, int edx, EClientFra
 				pMaterial->SetMaterialVarFlag(MATERIAL_VAR_NO_DRAW, (C::Get<bool>(Vars.bWorld) && C::Get<std::vector<bool>>(Vars.vecWorldRemovals).at(REMOVAL_SMOKE)) ? true : false);
 		}
 
+		// remove smoke overlay
+		static std::uintptr_t uSmokeCount = (MEM::FindPattern(CLIENT_DLL, XorStr("55 8B EC 83 EC 08 8B 15 ? ? ? ? 0F 57 C0")) + 0x8); // @xref: "effects/overlaysmoke"
+		if (C::Get<bool>(Vars.bWorld) && C::Get<std::vector<bool>>(Vars.vecWorldRemovals).at(REMOVAL_SMOKE))
+			*reinterpret_cast<int*>(*reinterpret_cast<std::uintptr_t*>(uSmokeCount)) = 0;
+
 		// remove visual punch
 		if (pLocal->IsAlive() && C::Get<bool>(Vars.bWorld))
 		{
 			// save old values
-			angOldViewPunch = pLocal->GetViewPunch();
-			angOldAimPunch = pLocal->GetPunch();
+			angViewPunchOld = pLocal->GetViewPunch();
+			angAimPunchOld = pLocal->GetPunch();
 
 			if (C::Get<std::vector<bool>>(Vars.vecWorldRemovals).at(REMOVAL_PUNCH))
 			{
@@ -491,8 +507,8 @@ void FASTCALL H::hkFrameStageNotify(IBaseClientDll* thisptr, int edx, EClientFra
 		// restore original visual punch values
 		if (pLocal->IsAlive() && C::Get<bool>(Vars.bWorld) && C::Get<std::vector<bool>>(Vars.vecWorldRemovals).at(REMOVAL_PUNCH))
 		{
-			pLocal->GetViewPunch() = angOldViewPunch;
-			pLocal->GetPunch() = angOldAimPunch;
+			pLocal->GetViewPunch() = angViewPunchOld;
+			pLocal->GetPunch() = angAimPunchOld;
 		}
 
 		break;
@@ -511,26 +527,16 @@ void FASTCALL H::hkDrawModel(IStudioRender* thisptr, int edx, DrawModelResults_t
 	if (!I::Engine->IsInGame() || I::Engine->IsTakingScreenshot())
 		return oDrawModel(thisptr, edx, pResults, info, pBoneToWorld, flFlexWeights, flFlexDelayedWeights, vecModelOrigin, nFlags);
 
+	CBaseEntity* pLocal = CBaseEntity::GetLocalPlayer();
 	bool bClearOverride = false;
 
-	if (G::pLocal != nullptr && C::Get<bool>(Vars.bEsp) && C::Get<bool>(Vars.bEspChams))
-		bClearOverride = CVisuals::Get().Chams(G::pLocal, pResults, info, pBoneToWorld, flFlexWeights, flFlexDelayedWeights, vecModelOrigin, nFlags);
+	if (pLocal != nullptr && C::Get<bool>(Vars.bEsp) && C::Get<bool>(Vars.bEspChams))
+		bClearOverride = CVisuals::Get().Chams(pLocal, pResults, info, pBoneToWorld, flFlexWeights, flFlexDelayedWeights, vecModelOrigin, nFlags);
 
 	oDrawModel(thisptr, edx, pResults, info, pBoneToWorld, flFlexWeights, flFlexDelayedWeights, vecModelOrigin, nFlags);
 	
 	if (bClearOverride)
 		I::StudioRender->ForcedMaterialOverride(nullptr);
-}
-
-void FASTCALL H::hkRenderSmokeOverlay(IViewRender* thisptr, int edx, bool bPreViewModel)
-{
-	static auto oRenderSmokeOverlay = DTR::RenderSmokeOverlay.GetOriginal<decltype(&hkRenderSmokeOverlay)>();
-
-	if (C::Get<bool>(Vars.bWorld) && C::Get<std::vector<bool>>(Vars.vecWorldRemovals).at(REMOVAL_SMOKE))
-		// set flSmokeIntensity to 0
-		*reinterpret_cast<float*>(reinterpret_cast<std::uintptr_t>(thisptr) + 0x588) = 0.0f;
-	else
-		oRenderSmokeOverlay(thisptr, edx, bPreViewModel);
 }
 
 int FASTCALL H::hkListLeavesInBox(void* thisptr, int edx, const Vector& vecMins, const Vector& vecMaxs, unsigned short* puList, int nListMax)
@@ -623,8 +629,8 @@ int FASTCALL H::hkSendDatagram(INetChannel* thisptr, int edx, bf_write* pDatagra
 	if (!I::Engine->IsInGame() || !C::Get<bool>(Vars.bMiscPingSpike) || pDatagram != nullptr || pNetChannelInfo == nullptr || sv_maxunlag == nullptr)
 		return oSendDatagram(thisptr, edx, pDatagram);
 
-	const int iOldInReliableState = thisptr->iInReliableState;
-	const int iOldInSequenceNr = thisptr->iInSequenceNr;
+	const int iInReliableStateOld = thisptr->iInReliableState;
+	const int iInSequenceNrOld = thisptr->iInSequenceNr;
 
 	// calculate max available fake latency with our real ping to keep it w/o real lags or delays
 	const float flMaxLatency = std::max(0.f, std::clamp(C::Get<float>(Vars.flMiscLatencyFactor), 0.f, sv_maxunlag->GetFloat()) - pNetChannelInfo->GetLatency(FLOW_OUTGOING));
@@ -632,8 +638,8 @@ int FASTCALL H::hkSendDatagram(INetChannel* thisptr, int edx, bf_write* pDatagra
 
 	const int iReturn = oSendDatagram(thisptr, edx, pDatagram);
 
-	thisptr->iInReliableState = iOldInReliableState;
-	thisptr->iInSequenceNr = iOldInSequenceNr;
+	thisptr->iInReliableState = iInReliableStateOld;
+	thisptr->iInSequenceNr = iInSequenceNrOld;
 
 	return iReturn;
 }
@@ -648,10 +654,12 @@ void FASTCALL H::hkOverrideView(IClientModeShared* thisptr, int edx, CViewSetup*
 	// get camera origin
 	G::vecCamera = pSetup->vecOrigin;
 
-	if (G::pLocal == nullptr || !G::pLocal->IsAlive())
+	CBaseEntity* pLocal = CBaseEntity::GetLocalPlayer();
+
+	if (pLocal == nullptr || !pLocal->IsAlive())
 		return oOverrideView(thisptr, edx, pSetup);
 
-	CBaseCombatWeapon* pWeapon = G::pLocal->GetWeapon();
+	CBaseCombatWeapon* pWeapon = pLocal->GetWeapon();
 
 	if (pWeapon == nullptr)
 		return oOverrideView(thisptr, edx, pSetup);
@@ -659,7 +667,7 @@ void FASTCALL H::hkOverrideView(IClientModeShared* thisptr, int edx, CViewSetup*
 	if (CCSWeaponData* pWeaponData = I::WeaponSystem->GetWeaponData(pWeapon->GetItemDefinitionIndex());
 		pWeaponData != nullptr && C::Get<bool>(Vars.bScreen) && std::fpclassify(C::Get<float>(Vars.flScreenCameraFOV)) != FP_ZERO &&
 		// check is we not scoped
-		(pWeaponData->nWeaponType == WEAPONTYPE_SNIPER ? !G::pLocal->IsScoped() : true))
+		(pWeaponData->nWeaponType == WEAPONTYPE_SNIPER ? !pLocal->IsScoped() : true))
 		// set camera fov
 		pSetup->flFOV += C::Get<float>(Vars.flScreenCameraFOV);
 
@@ -683,7 +691,9 @@ float FASTCALL H::hkGetViewModelFOV(IClientModeShared* thisptr, int edx)
 	if (!I::Engine->IsInGame() || I::Engine->IsTakingScreenshot())
 		return oGetViewModelFOV(thisptr, edx);
 
-	if (G::pLocal != nullptr && G::pLocal->IsAlive() && C::Get<bool>(Vars.bScreen) && std::fpclassify(C::Get<float>(Vars.flScreenViewModelFOV)) != FP_ZERO)
+	if (auto pLocal = CBaseEntity::GetLocalPlayer();
+		pLocal != nullptr && pLocal->IsAlive() &&
+		C::Get<bool>(Vars.bScreen) && std::fpclassify(C::Get<float>(Vars.flScreenViewModelFOV)) != FP_ZERO)
 		return oGetViewModelFOV(thisptr, edx) + C::Get<float>(Vars.flScreenViewModelFOV);
 
 	return oGetViewModelFOV(thisptr, edx);
@@ -696,8 +706,10 @@ int FASTCALL H::hkDoPostScreenEffects(IClientModeShared* thisptr, int edx, CView
 	if (!I::Engine->IsInGame() || I::Engine->IsTakingScreenshot())
 		return oDoPostScreenEffects(thisptr, edx, pSetup);
 
-	if (G::pLocal != nullptr && C::Get<bool>(Vars.bEsp) && C::Get<bool>(Vars.bEspGlow))
-		CVisuals::Get().Glow(G::pLocal);
+	CBaseEntity* pLocal = CBaseEntity::GetLocalPlayer();
+
+	if (pLocal != nullptr && I::GlowManager != nullptr && C::Get<bool>(Vars.bEsp) && C::Get<bool>(Vars.bEspGlow))
+		CVisuals::Get().Glow(pLocal);
 
 	return oDoPostScreenEffects(thisptr, edx, pSetup);
 }

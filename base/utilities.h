@@ -3,6 +3,10 @@
 #include "common.h"
 // used: vector
 #include "sdk/datatypes/vector.h"
+// used: keyvalues
+#include "sdk/datatypes/keyvalues.h"
+// used: baseentity, handleentity
+#include "sdk/entity.h"
 // used: material
 #include "sdk/interfaces/imaterialsystem.h"
 // used: events listerner setup
@@ -45,7 +49,8 @@ namespace U
 {
 	// Get
 	/* returns class of hud element with given name */
-	std::uintptr_t* FindHudElement(const char* szName);
+	template <class C>
+	C* FindHudElement(const char* szName);
 
 	// Game
 	/* updates hud, clears delta tick */
@@ -63,7 +68,7 @@ namespace U
 	/* allocate client dll data for the object */
 	IClientNetworkable* CreateDLLEntity(int iEntity, EClassIndex nClassID, int nSerial);
 	/* returns icon of given index for custom font */
-	const char8_t* GetWeaponIcon(short nItemDefinitionIndex);
+	const char* GetWeaponIcon(short nItemDefinitionIndex);
 
 	// Extra
 	/* flashes the specified window */

@@ -142,6 +142,15 @@ DWORD WINAPI OnDllDetach(LPVOID lpParameter)
 	while (!IPT::IsKeyReleased(C::Get<int>(Vars.iPanicKey)))
 		std::this_thread::sleep_for(500ms);
 
+	#ifdef DEBUG_CONSOLE
+	// detach console
+	L::Detach();
+	#else
+	// close logging output file
+	if (L::ofsFile.is_open())
+		L::ofsFile.close();
+	#endif
+
 	#if 0
 	// destroy entity listener
 	U::EntityListener.Destroy();
@@ -165,16 +174,10 @@ DWORD WINAPI OnDllDetach(LPVOID lpParameter)
 	// destroy render
 	D::Destroy();
 
-	#ifdef DEBUG_CONSOLE
-	// detach console
-	L::Detach();
-	#else
-	// close logging output file
-	if (L::ofsFile.is_open())
-		L::ofsFile.close();
-	#endif
-
-	 // free our library memory from process and exit from our thread
+	/*
+	 * free our library memory from process and exit from our thread
+	 * anyway throws assertion about source engine max unique threads limit (16)
+	 */
 	FreeLibraryAndExitThread((HMODULE)lpParameter, EXIT_SUCCESS);
 }
 
