@@ -42,7 +42,7 @@ namespace IPT
 	}
 
 	/* was given key released */
-	inline bool IsKeyReleased(const std::uint32_t uButtonCode)
+	inline const bool IsKeyReleased(const std::uint32_t uButtonCode)
 	{
 		if (arrKeyState.at(uButtonCode) == EKeyState::RELEASED)
 		{

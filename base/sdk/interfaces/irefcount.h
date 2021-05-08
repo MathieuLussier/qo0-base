@@ -1,6 +1,4 @@
 #pragma once
-// used: InterlockedDecrement
-#include <windows.h>
 
 class IRefCounted
 {

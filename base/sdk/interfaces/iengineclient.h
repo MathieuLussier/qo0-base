@@ -38,16 +38,8 @@ enum ERenderViewInfo : int
 struct PlayerInfo_t
 {
 	std::uint64_t	ullVersion = 0ULL;
-	union
-	{
-		std::uint64_t ullXuid;
-		struct
-		{
-			std::uint32_t nXuidLow;
-			std::uint32_t nXuidHigh;
-		};
-	};
-
+	int				nXuidLow;
+	int				nXuidHigh;
 	char			szName[128];
 	int				nUserID;
 	char			szSteamID[33];

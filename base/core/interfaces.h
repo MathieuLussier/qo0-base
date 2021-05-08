@@ -36,7 +36,6 @@
 #include "../sdk/interfaces/ivdebugoverlay.h"
 #include "../sdk/interfaces/ivengineeffects.h"
 #include "../sdk/interfaces/iglowmanager.h"
-#include "../sdk/interfaces/iviewrender.h"
 #include "../sdk/interfaces/iviewrenderbeams.h"
 #include "../sdk/interfaces/ivmodelinfo.h"
 #include "../sdk/interfaces/ivmodelrender.h"
@@ -77,7 +76,7 @@ namespace I
 	inline IEngineVGui*				EngineVGui;
 	inline IEngineTrace*			EngineTrace;
 	inline IEngineSound*			EngineSound;
-	inline INetworkContainer*		NetworkContainer;
+	inline INetworkContainer*		StringContainer;
 	inline IGameEventManager2*		GameEvent;
 	inline IVRenderView*			RenderView;
 	inline IVDebugOverlay*			DebugOverlay;
@@ -103,10 +102,9 @@ namespace I
 	inline IGlobalVarsBase*			Globals;
 	inline IMemAlloc*				MemAlloc;
 	inline IDirect3DDevice9*		DirectDevice;
-	inline IViewRender*				ViewRender;
 	inline IViewRenderBeams*		ViewRenderBeams;
 	inline IInput*					Input;
-	inline IClientState*			ClientState;
+	inline IClientState*		ClientState;
 	inline IWeaponSystem*			WeaponSystem;
 	inline IGlowObjectManager*		GlowManager;
 }

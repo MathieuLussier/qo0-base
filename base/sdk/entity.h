@@ -546,10 +546,10 @@ public:
 		return nullptr;
 	}
 
-	[[nodiscard]] CCSGOPlayerAnimState* GetAnimationState()
+	[[nodiscard]] CBasePlayerAnimState* GetAnimationState()
 	{
 		// @ida: 8B 8E ? ? ? ? F3 0F 10 48 ? E8 ? ? ? ? C7 + 0x2
-		return *reinterpret_cast<CCSGOPlayerAnimState**>(reinterpret_cast<std::uintptr_t>(this) + 0x3914);
+		return *reinterpret_cast<CBasePlayerAnimState**>(reinterpret_cast<std::uintptr_t>(this) + 0x3914);
 	}
 	#pragma endregion
 
@@ -597,7 +597,7 @@ public:
 		// @ida weapon_shootpos: 55 8B EC 56 8B 75 08 57 8B F9 56 8B 07 FF 90
 		if (IsUsedNewAnimState() && bShouldCorrect)
 		{
-			CCSGOPlayerAnimState* pAnimState = this->GetAnimationState();
+			CBasePlayerAnimState* pAnimState = this->GetAnimationState();
 
 			if (pAnimState != nullptr)
 				ModifyEyePosition(pAnimState, &vecPosition);
@@ -647,10 +647,10 @@ public:
 	CBaseCombatWeapon*		GetWeapon();
 	int						GetMaxHealth();
 	std::optional<Vector>	GetBonePosition(int iBone);
-	int						GetBoneByHash(const FNV1A_t uBoneHash) const;
+	int						GetBoneByHash(const FNV1A_t uBoneHash);
 	std::optional<Vector>	GetHitboxPosition(int iHitbox);
 	std::optional<Vector>	GetHitGroupPosition(int iHitGroup);
-	void					ModifyEyePosition(CCSGOPlayerAnimState* pAnimState, Vector* vecPosition) const;
+	void					ModifyEyePosition(CBasePlayerAnimState* pAnimState, Vector* vecPosition) const;
 	int						PostThink();
 	bool					IsEnemy(CBaseEntity* pEntity);
 	bool					IsTargetingLocal(CBaseEntity* pLocal);

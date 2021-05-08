@@ -2,12 +2,14 @@
 
 // used: angle/vector calculations
 #include "../utilities/math.h"
+// used: deathmatch check
+#include "../core/variables.h"
 // used: convar, cliententitylist, physics, trace, clients, globals interfaces
 #include "../core/interfaces.h"
 
 float CAutoWall::GetDamage(CBaseEntity* pLocal, const Vector& vecPoint, FireBulletData_t& dataOut)
 {
-	const Vector vecPosition = pLocal->GetEyePosition();
+	Vector vecPosition = pLocal->GetEyePosition();
 
 	// setup data
 	FireBulletData_t data = { };
@@ -28,52 +30,33 @@ float CAutoWall::GetDamage(CBaseEntity* pLocal, const Vector& vecPoint, FireBull
 
 void CAutoWall::ScaleDamage(int iHitGroup, CBaseEntity* pEntity, float flWeaponArmorRatio, float& flDamage)
 {
-	if (pEntity->IsPlayer())
-		return;
-
 	const bool bHeavyArmor = pEntity->HasHeavyArmor();
 	const int iArmor = pEntity->GetArmor();
-
-	static CConVar* mp_damage_scale_ct_head = I::ConVar->FindVar(XorStr("mp_damage_scale_ct_head"));
-	static CConVar* mp_damage_scale_t_head = I::ConVar->FindVar(XorStr("mp_damage_scale_t_head"));
-
-	static CConVar* mp_damage_scale_ct_body = I::ConVar->FindVar(XorStr("mp_damage_scale_ct_body"));
-	static CConVar* mp_damage_scale_t_body = I::ConVar->FindVar(XorStr("mp_damage_scale_t_body"));
-
-	const float flHeadScale = pEntity->GetTeam() == TEAM_CT ? mp_damage_scale_ct_head->GetFloat() : pEntity->GetTeam() == TEAM_TT ? mp_damage_scale_t_head->GetFloat() : 1.0f;
-	const float flBodyScale = pEntity->GetTeam() == TEAM_CT ? mp_damage_scale_ct_body->GetFloat() : pEntity->GetTeam() == TEAM_TT ? mp_damage_scale_t_body->GetFloat() : 1.0f;
 
 	switch (iHitGroup)
 	{
 	case HITGROUP_HEAD:
-		flDamage *= (bHeavyArmor ? 2.0f : 4.0f) * flHeadScale;
+		flDamage *= bHeavyArmor ? 2.0f : 4.0f;
 		break;
 	case HITGROUP_STOMACH:
-		flDamage *= 1.25f * flBodyScale;
-		break;
-	case HITGROUP_CHEST:
-	case HITGROUP_LEFTARM:
-	case HITGROUP_RIGHTARM:
-		flDamage *= flBodyScale;
+		flDamage *= 1.25f;
 		break;
 	case HITGROUP_LEFTLEG:
 	case HITGROUP_RIGHTLEG:
-		flDamage *= 0.75f * flBodyScale;
-		break;
-	default:
+		flDamage *= 0.75f;
 		break;
 	}
 
 	// check is armored
-	if (iArmor > 0 && (bHeavyArmor || (iHitGroup == HITGROUP_HEAD && pEntity->HasHelmet()) || (iHitGroup >= HITGROUP_GENERIC && iHitGroup <= HITGROUP_RIGHTARM)))
+	if (iArmor > 0 && ((iHitGroup == HITGROUP_HEAD && pEntity->HasHelmet()) || (iHitGroup >= HITGROUP_GENERIC && iHitGroup <= HITGROUP_RIGHTARM)))
 	{
-		float flArmorScale = 1.0f, flArmorBonusRatio = 0.5f, flArmorRatio = flWeaponArmorRatio * 0.5f;
+		float flModifier = 1.0f, flArmorBonusRatio = 0.5f, flArmorRatio = flWeaponArmorRatio * 0.5f;
 
 		if (bHeavyArmor)
 		{
-			flArmorScale = 0.33f;
 			flArmorBonusRatio = 0.33f;
 			flArmorRatio *= 0.5f;
+			flModifier = 0.33f;
 		}
 
 		float flNewDamage = flDamage * flArmorRatio;
@@ -81,14 +64,80 @@ void CAutoWall::ScaleDamage(int iHitGroup, CBaseEntity* pEntity, float flWeaponA
 		if (bHeavyArmor)
 			flNewDamage *= 0.85f;
 
-		if (((flDamage - flDamage * flArmorRatio) * (flArmorScale * flArmorBonusRatio)) > iArmor)
+		if (((flDamage - flDamage * flArmorRatio) * (flModifier * flArmorBonusRatio)) > iArmor)
 			flNewDamage = flDamage - iArmor / flArmorBonusRatio;
 
 		flDamage = flNewDamage;
 	}
 }
 
-bool CAutoWall::IsBreakableEntity(CBaseEntity* pEntity) const
+// @credits: https://github.com/ValveSoftware/source-sdk-2013/blob/master/sp/src/game/shared/util_shared.cpp#L687
+void CAutoWall::ClipTraceToPlayers(const Vector& vecAbsStart, const Vector& vecAbsEnd, unsigned int fMask, ITraceFilter* pFilter, Trace_t* pTrace)
+{
+	Trace_t trace = { };
+	float flSmallestFraction = pTrace->flFraction;
+
+	Ray_t ray(vecAbsStart, vecAbsEnd);
+
+	for (int i = 1; i < I::Globals->nMaxClients; i++)
+	{
+		CBaseEntity* pEntity = I::ClientEntityList->Get<CBaseEntity>(i);
+
+		if (pEntity == nullptr || !pEntity->IsAlive() || pEntity->IsDormant())
+			continue;
+
+		if (pFilter != nullptr && pFilter->ShouldHitEntity(pEntity, fMask) == false)
+			continue;
+
+		const ICollideable* pCollideable = pEntity->GetCollideable();
+
+		if (pCollideable == nullptr)
+			continue;
+
+		// get bounding box
+		const Vector vecMin = pCollideable->OBBMins();
+		const Vector vecMax = pCollideable->OBBMaxs();
+
+		// calculate world space center
+		const Vector vecCenter = (vecMax + vecMin) * 0.5f;
+		const Vector vecPosition = vecCenter + pEntity->GetOrigin();
+
+		Vector vecTo = vecPosition - vecAbsStart;
+		Vector vecDirection = vecAbsEnd - vecAbsStart;
+		float flLength = vecDirection.NormalizeInPlace();
+
+		const float flRangeAlong = vecDirection.DotProduct(vecTo);
+		float flRange = 0.0f;
+
+		// calculate distance to ray
+		// off start point
+		if (flRangeAlong < 0.0f)
+			flRange = -vecTo.Length();
+		// off end point
+		else if (flRangeAlong > flLength)
+			flRange = -(vecPosition - vecAbsEnd).Length();
+		// within ray bounds
+		else
+		{
+			Vector vecRay = vecPosition - (vecDirection * flRangeAlong + vecAbsStart);
+			flRange = vecRay.Length();
+		}
+
+		if (flRange < 0.0f || flRange > 60.0f)
+			continue;
+
+		I::EngineTrace->ClipRayToEntity(ray, fMask | CONTENTS_HITBOX, pEntity, &trace);
+
+		if (trace.flFraction < flSmallestFraction)
+		{
+			// we shortened the ray - save off the trace
+			*pTrace = trace;
+			flSmallestFraction = trace.flFraction;
+		}
+	}
+}
+
+bool CAutoWall::IsBreakableEntity(CBaseEntity* pEntity)
 {
 	// @ida isbreakableentity: 55 8B EC 51 56 8B F1 85 F6 74 68
 
@@ -158,70 +207,7 @@ bool CAutoWall::IsBreakableEntity(CBaseEntity* pEntity) const
 	return true;
 }
 
-// @credits: https://github.com/ValveSoftware/source-sdk-2013/blob/master/sp/src/game/shared/util_shared.cpp#L687
-void CAutoWall::ClipTraceToPlayers(const Vector& vecAbsStart, const Vector& vecAbsEnd, unsigned int fMask, ITraceFilter* pFilter, Trace_t* pTrace)
-{
-	Trace_t trace = { };
-	float flSmallestFraction = pTrace->flFraction;
-
-	const Ray_t ray(vecAbsStart, vecAbsEnd);
-
-	for (int i = 1; i < I::Globals->nMaxClients; i++)
-	{
-		CBaseEntity* pEntity = I::ClientEntityList->Get<CBaseEntity>(i);
-
-		if (pEntity == nullptr || !pEntity->IsAlive() || pEntity->IsDormant())
-			continue;
-
-		if (pFilter != nullptr && !pFilter->ShouldHitEntity(pEntity, fMask))
-			continue;
-
-		const ICollideable* pCollideable = pEntity->GetCollideable();
-
-		if (pCollideable == nullptr)
-			continue;
-
-		// get bounding box
-		const Vector vecMin = pCollideable->OBBMins();
-		const Vector vecMax = pCollideable->OBBMaxs();
-
-		// calculate world space center
-		const Vector vecCenter = (vecMax + vecMin) * 0.5f;
-		const Vector vecPosition = vecCenter + pEntity->GetOrigin();
-
-		Vector vecTo = vecPosition - vecAbsStart;
-		Vector vecDirection = vecAbsEnd - vecAbsStart;
-		const float flLength = vecDirection.NormalizeInPlace();
-
-		const float flRangeAlong = vecDirection.DotProduct(vecTo);
-		float flRange = 0.0f;
-
-		// calculate distance to ray
-		if (flRangeAlong < 0.0f)
-			// off start point
-			flRange = -vecTo.Length();
-		else if (flRangeAlong > flLength)
-			// off end point
-			flRange = -(vecPosition - vecAbsEnd).Length();
-		else
-			// within ray bounds
-			flRange = (vecPosition - (vecDirection * flRangeAlong + vecAbsStart)).Length();
-
-		if (flRange < 0.0f || flRange > 60.0f)
-			continue;
-
-		I::EngineTrace->ClipRayToEntity(ray, fMask | CONTENTS_HITBOX, pEntity, &trace);
-
-		if (trace.flFraction < flSmallestFraction)
-		{
-			// we shortened the ray - save off the trace
-			*pTrace = trace;
-			flSmallestFraction = trace.flFraction;
-		}
-	}
-}
-
-bool CAutoWall::TraceToExit(Trace_t& enterTrace, Trace_t& exitTrace, Vector vecPosition, Vector vecDirection) const
+bool CAutoWall::TraceToExit(Trace_t& enterTrace, Trace_t& exitTrace, Vector vecPosition, Vector vecDirection)
 {
 	float flDistance = 0.0f;
 	int iStartContents = 0;
@@ -299,7 +285,7 @@ bool CAutoWall::TraceToExit(Trace_t& enterTrace, Trace_t& exitTrace, Vector vecP
 	return false;
 }
 
-bool CAutoWall::HandleBulletPenetration(CBaseEntity* pLocal, CCSWeaponData* pWeaponData, surfacedata_t* pEnterSurfaceData, FireBulletData_t& data) const
+bool CAutoWall::HandleBulletPenetration(CBaseEntity* pLocal, CCSWeaponData* pWeaponData, surfacedata_t* pEnterSurfaceData, FireBulletData_t& data)
 {
 	static CConVar* ff_damage_reduction_bullets = I::ConVar->FindVar(XorStr("ff_damage_reduction_bullets"));
 	static CConVar* ff_damage_bullet_penetration = I::ConVar->FindVar(XorStr("ff_damage_bullet_penetration"));

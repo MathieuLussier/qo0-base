@@ -11,7 +11,7 @@ enum EGlowRenderStyle : int
 	GLOWRENDERSTYLE_RIMGLOW3D,
 	GLOWRENDERSTYLE_EDGE_HIGHLIGHT,
 	GLOWRENDERSTYLE_EDGE_HIGHLIGHT_PULSE,
-	GLOWRENDERSTYLE_COUNT
+	GLOWRENDERSTYLE_COUNT,
 };
 
 class IGlowObjectManager
@@ -21,8 +21,8 @@ public:
 	{
 		void Set(Color color, int nRenderStyle = GLOWRENDERSTYLE_DEFAULT) // @note: styles not used cuz other styles doesnt have ignorez flag and needed to rebuild glow
 		{
-			this->vecColor = Vector(color.Base<COLOR_R>(), color.Base<COLOR_G>(), color.Base<COLOR_B>());
-			this->flAlpha = color.Base<COLOR_A>();
+			this->vecColor = Vector(color.r() / 255.f, color.g() / 255.f, color.b() / 255.f);
+			this->flAlpha = color.a() / 255.f;
 			this->flBloomAmount = 1.0f;
 			this->bRenderWhenOccluded = true;
 			this->bRenderWhenUnoccluded = false;
@@ -50,18 +50,6 @@ public:
 		int				nNextFreeSlot;
 	};
 
-	struct GlowBoxObject_t
-	{
-		Vector	vecPosition;
-		QAngle	angOrientation;
-		Vector	vecMins;
-		Vector	vecMaxs;
-		float	flBirthTimeIndex;
-		float	flTerminationTimeIndex;
-		Color	colColor;
-	};
-
 	CUtlVector<GlowObject_t> vecGlowObjectDefinitions;
 	int nFirstFreeSlot;
-	CUtlVector<GlowBoxObject_t> vecGlowBoxDefinitions;
 };
