@@ -416,8 +416,6 @@
     </ClInclude>
     <ClInclude Include="sdk\interfaces\iviewrender.h">
       <Filter>include\sdk\interfaces</Filter>
-    <ClInclude Include="features\backtrack.h">
-      <Filter>include\features</Filter>
     </ClInclude>
     <ClInclude Include="utilities\kit_parser.hpp">
       <Filter>include</Filter>

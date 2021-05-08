@@ -282,24 +282,20 @@ float M::Deg2rad(float angle) {
 	return (float)((M_PI / 180) * angle);
 }
 
-void M::RotateCenter(const ImVec2& vecCenter, const float flAngle, ImVec2* pOutPoint)
-{
-	const float flSin = std::sinf(M_DEG2RAD(flAngle));
-	const float flCos = std::cosf(M_DEG2RAD(flAngle));
-
-	pOutPoint->x -= vecCenter.x;
-	pOutPoint->y -= vecCenter.y;
-
-	const float x = pOutPoint->x * flCos - pOutPoint->y * flSin;
-	const float y = pOutPoint->x * flSin + pOutPoint->y * flCos;
-
-	pOutPoint->x = x + vecCenter.x;
-	pOutPoint->y = y + vecCenter.y;
-}
-float M::Deg2rad(float angle) {
-	return (float)((M_PI / 180) * angle);
-}
-
+//void M::RotateCenter(const ImVec2& vecCenter, const float flAngle, ImVec2* pOutPoint)
+//{
+//	const float flSin = std::sinf(M_DEG2RAD(flAngle));
+//	const float flCos = std::cosf(M_DEG2RAD(flAngle));
+//
+//	pOutPoint->x -= vecCenter.x;
+//	pOutPoint->y -= vecCenter.y;
+//
+//	const float x = pOutPoint->x * flCos - pOutPoint->y * flSin;
+//	const float y = pOutPoint->x * flSin + pOutPoint->y * flCos;
+//
+//	pOutPoint->x = x + vecCenter.x;
+//	pOutPoint->y = y + vecCenter.y;
+//}
 float M::Rad2deg(float angle) {
 	return (float)((180 / M_PI) * angle);
 }
